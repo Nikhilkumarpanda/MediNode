@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>MediNode v4 — AI Clinical Intake System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --n900:#0B1D3A;--n800:#1E3A8A;--n700:#2D4FA8;--n600:#3B63C9;--n500:#4F7BE8;
+  --g900:#064E3B;--g800:#15803D;--g700:#16A34A;--g600:#22C55E;--g500:#4ADE80;
+  --r:#DC2626;--rp:#FFF0F0;--amb:#F59E0B;
+  --sl:#F0F4FA;--sl2:#E4EBF5;--sl3:#C8D6EC;--sl4:#8FA8CC;
+  --t1:#0B1D3A;--t2:#3D5A80;--t3:#7A96B8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--sl);color:var(--t1);min-height:100vh;overflow-x:hidden}
+#root{min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sl3);border-radius:3px}
+
+.hdr{background:linear-gradient(135deg,var(--n900) 0%,var(--n800) 60%,#1a4fa0 100%);color:#fff;padding:0 22px;height:62px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-ic{width:34px;height:34px;background:linear-gradient(135deg,var(--g700),var(--g600));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 12px rgba(21,128,61,.4)}
+.logo-tx{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.logo-tx em{color:#4ADE80;font-style:normal}
+.logo-sb{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
+.rsw{display:flex;background:rgba(255,255,255,.1);border-radius:40px;padding:3px;gap:2px;border:1px solid rgba(255,255,255,.15)}
+.rbtn{padding:6px 15px;border-radius:36px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .25s;color:rgba(255,255,255,.65);background:transparent;position:relative}
+.rbtn.on{background:linear-gradient(135deg,var(--g700),var(--g600));color:#fff;box-shadow:0 4px 14px rgba(21,128,61,.5)}
+.rbtn .qdot{position:absolute;top:-2px;right:-2px;background:var(--r);color:#fff;font-size:8px;font-weight:900;min-width:15px;height:15px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--n800)}
+.hdr-r{display:flex;align-items:center;gap:7px}
+.lpill,.apill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;outline:none;display:flex;align-items:center;gap:5px}
+.lpill option{background:#fff;color:var(--t1)}
+.apill.muted{background:rgba(220,38,38,.25);border-color:rgba(220,38,38,.4)}
+.abha-chip{background:linear-gradient(135deg,#064E3B,#15803D);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.5px}
+.main{padding-top:62px;min-height:100vh}
+
+.hero{min-height:calc(100vh - 62px);background:linear-gradient(135deg,#0B1D3A 0%,#1E3A8A 40%,#15803D 100%);position:relative;display:flex;align-items:stretch;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 70% 50%,rgba(21,128,61,.25),transparent 70%)}
+.hero-l{flex:1;display:flex;flex-direction:column;justify-content:center;padding:46px 42px;position:relative;z-index:2;max-width:490px}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:#4ADE80;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:22px}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 8px #4ADE80;animation:dp 2s infinite}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-t{font-size:46px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-1.5px;margin-bottom:15px}
+.hero-t span{background:linear-gradient(135deg,#4ADE80,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-s{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:28px;max-width:390px}
+.hero-stats{display:flex;gap:26px;flex-wrap:wrap}
+.hstat-v{font-size:26px;font-weight:900;color:#4ADE80;line-height:1}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px}
+.hero-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.hpill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600}
+.hero-r{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 42px 32px 0;position:relative;z-index:2;min-width:450px}
+
+.acard{width:100%;max-width:430px;background:rgba(255,255,255,.98);border-radius:26px;box-shadow:0 32px 80px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.6);overflow:hidden;animation:ci .5s cubic-bezier(.34,1.2,.64,1)}
+@keyframes ci{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.acard-hdr{background:linear-gradient(135deg,var(--n900),var(--n800));padding:18px 24px 32px;position:relative}
+.acard-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:24px;background:rgba(255,255,255,.98);border-radius:50% 50% 0 0/17px 17px 0 0}
+.acard-body{padding:14px 24px 24px;max-height:calc(100vh - 130px);overflow-y:auto}
+.tbar{display:flex;background:var(--sl);border-radius:10px;padding:3px;gap:2px;margin-bottom:14px}
+.tbtn{flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .25s;background:transparent;color:var(--t2)}
+.tbtn.on{background:#fff;color:var(--n800);box-shadow:0 2px 8px rgba(11,29,58,.12)}
+.idbar{display:flex;gap:6px;margin-bottom:12px}
+.idbtn{flex:1;padding:9px;border-radius:9px;border:2px solid var(--sl2);cursor:pointer;font-size:12px;font-weight:600;background:#fff;color:var(--t2);transition:all .2s}
+.idbtn.on{border-color:var(--n800);background:linear-gradient(135deg,#EEF3FF,#E8F5FF);color:var(--n800)}
+
+/* VOICE FIELD */
+.vf{margin-bottom:11px}
+.vf-lbl{font-size:10px;font-weight:800;color:var(--t2);margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;gap:6px;letter-spacing:.4px;text-transform:uppercase;min-height:16px}
+.vf-acts{display:flex;gap:3px;flex-shrink:0}
+.icon-btn{background:var(--sl);border:1px solid var(--sl2);cursor:pointer;font-size:11px;border-radius:6px;padding:3px 7px;transition:all .15s;color:var(--t2);display:inline-flex;align-items:center;gap:3px;font-weight:700;line-height:1.4}
+.icon-btn:hover{background:var(--n800);color:#fff;border-color:var(--n800)}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn.rec{background:var(--r);color:#fff;border-color:var(--r);animation:recPulse .8s infinite}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}50%{box-shadow:0 0 0 8px rgba(220,38,38,0)}}
+.vf-wrap{position:relative}
+.vf-in{width:100%;padding:11px 42px 11px 13px;border:2px solid var(--sl2);border-radius:11px;font-size:13px;font-family:inherit;outline:none;transition:all .2s;background:#fff;color:var(--t1);line-height:1.4}
+.vf-in:focus{border-color:var(--n700);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
+.vf-in.err{border-color:var(--r);box-shadow:0 0 0 3px rgba(220,38,38,.08)}
+.vf-in.rec{border-color:var(--r);background:#FFF8F8}
+.vf-ta{width:100%;padding:11px 42px 11px 13px;border:2px solid var(--sl2);border-radius:11px;font-size:13px;font-family:inherit;outline:none;transition:all .2s;background:#fff;color:var(--t1);resize:vertical;min-height:70px;line-height:1.5}
+.vf-ta:focus{border-color:var(--n700);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
+.vf-ta.rec{border-color:var(--r);background:#FFF8F8}
+.vf-mic{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;background:var(--sl2);color:var(--t2);z-index:5;padding:0}
+.vf-mic:hover{background:var(--n800);color:#fff}
+.vf-mic.rec{background:var(--r);color:#fff;animation:recPulse .8s infinite}
+.vf-mic-mid{top:50%;transform:translateY(-50%)}
+.vf-err{font-size:10px;color:var(--r);margin-top:4px;font-weight:600}
+.vf-hint{font-size:10px;color:var(--t3);margin-top:3px}
+.vf-rec-bar{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FEF2F2,#FFF1F1);border:1px solid rgba(220,38,38,.2);border-radius:9px;padding:7px 11px;margin-top:6px}
+.wvf{display:flex;align-items:center;gap:2px;height:22px}
+.wvb{width:3px;border-radius:2px;background:var(--r);transition:height .08s}
+
+.btn{padding:12px 20px;border-radius:11px;border:none;cursor:pointer;font-size:14px;font-weight:700;transition:all .25s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn:active{transform:scale(.97)}
+.btn-p{background:linear-gradient(135deg,var(--n800),var(--n700));color:#fff;box-shadow:0 5px 18px rgba(30,58,138,.35)}
+.btn-p:hover{box-shadow:0 7px 24px rgba(30,58,138,.45);transform:translateY(-1px)}
+.btn-p:disabled{background:var(--sl3);box-shadow:none;cursor:not-allowed;transform:none}
+.btn-g{background:linear-gradient(135deg,var(--g800),var(--g700));color:#fff;box-shadow:0 5px 18px rgba(21,128,61,.35)}
+.btn-g:hover{box-shadow:0 7px 24px rgba(21,128,61,.45);transform:translateY(-1px)}
+.btn-g:disabled{background:var(--sl3);box-shadow:none;cursor:not-allowed}
+.btn-o{background:transparent;border:2px solid var(--n800);color:var(--n800)}
+.btn-o:hover{background:var(--n800);color:#fff}
+.btn-gh{background:var(--sl);color:var(--t2);border:1px solid var(--sl2)}
+.btn-gh:hover{background:var(--sl2)}
+.btn-w{width:100%}.btn-lg{padding:14px 24px;font-size:15px;border-radius:12px}
+.btn-sm{padding:7px 13px;font-size:11px;border-radius:8px}
+
+.csnt{background:linear-gradient(135deg,#F0F7FF,#F0FDF7);border:1.5px solid rgba(30,58,138,.12);border-radius:14px;padding:15px;margin-bottom:11px}
+.csnt-h{font-size:11px;font-weight:800;color:var(--n800);margin-bottom:11px;letter-spacing:.4px;text-transform:uppercase}
+.csnt-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(30,58,138,.07)}
+.csnt-row:last-child{border-bottom:none;padding-bottom:0}
+.csnt-hit{display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer}
+.cbox{width:21px;height:21px;min-width:21px;border-radius:6px;border:2.5px solid var(--sl3);background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.cbox.ck{background:linear-gradient(135deg,var(--n800),var(--n700));border-color:var(--n800);box-shadow:0 3px 10px rgba(30,58,138,.3)}
+.cbox.ck::after{content:'✓';color:#fff;font-size:12px;font-weight:900;line-height:1}
+.csnt-tx{font-size:12px;color:var(--t2);line-height:1.5;user-select:none}
+
+.hosp-sec{margin-bottom:13px}
+.hosp-h{font-size:10px;font-weight:800;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.hosp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hosp-c{background:#fff;border:2px solid var(--sl2);border-radius:12px;padding:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.hosp-c::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--n800),var(--g700));opacity:0;transition:opacity .2s}
+.hosp-c:hover,.hosp-c.sel{border-color:var(--n700);box-shadow:0 3px 14px rgba(30,58,138,.14)}
+.hosp-c:hover::before,.hosp-c.sel::before{opacity:1}
+.hosp-c.sel{background:linear-gradient(135deg,#EEF3FF,#F0FDF7)}
+.hosp-n{font-size:12px;font-weight:700;color:var(--n900);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:34px}
+.hosp-m{font-size:10px;color:var(--t3);line-height:1.5}
+.hosp-b{position:absolute;top:7px;right:7px;background:linear-gradient(135deg,var(--g800),var(--g700));color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:9px}
+.loc-btn{display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--n800),var(--n700));color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:7px;transition:all .2s;width:100%;justify-content:center}
+.loc-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(30,58,138,.3)}
+.loc-btn:disabled{background:var(--sl2);color:var(--t2);cursor:default;transform:none;box-shadow:none}
+.spin{width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.bdg-r{background:#FEE2E2;color:#DC2626}.bdg-a{background:#FEF3C7;color:#D97706}
+.bdg-g{background:#DCFCE7;color:#15803D}.bdg-b{background:#DBEAFE;color:#1E3A8A}
+.bdg-p{background:#EDE9FE;color:#7C3AED}.bdg-t{background:#CCFBF1;color:#0D9488}
+.bdg-new{background:linear-gradient(135deg,var(--g700),var(--g600));color:#fff;animation:newPulse 2s infinite}
+@keyframes newPulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.pgb{height:6px;background:var(--sl2);border-radius:3px;overflow:hidden}
+.pgf{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.pgf-n{background:linear-gradient(90deg,var(--n700),var(--n500))}
+.pgf-g{background:linear-gradient(90deg,var(--g800),var(--g600))}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(11,29,58,.06);padding:18px;border:1px solid rgba(0,0,0,.04)}
+
+/* MCQ — no nested buttons */
+.mcq-row{display:flex;align-items:stretch;gap:5px;margin-bottom:7px}
+.mcqo{flex:1;padding:12px 13px;border-radius:11px;border:2px solid var(--sl2);background:#fff;cursor:pointer;text-align:left;font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px;color:var(--t1)}
+.mcqo:hover{border-color:var(--n600);background:#F8FAFF}
+.mcqo.on{border-color:var(--n800);background:linear-gradient(135deg,#EEF3FF,#E8F0FF);color:var(--n800);box-shadow:0 3px 12px rgba(30,58,138,.12)}
+.mcql{width:25px;height:25px;min-width:25px;border-radius:7px;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;opacity:.5;transition:all .2s}
+.mcqo.on .mcql{opacity:1;background:var(--n800);color:#fff;border-color:var(--n800)}
+.mcq-spk{width:34px;border-radius:10px;border:2px solid var(--sl2);background:var(--sl);cursor:pointer;font-size:13px;color:var(--t2);transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mcq-spk:hover{background:var(--n800);color:#fff;border-color:var(--n800)}
+.mcq-spk:active{transform:scale(.93)}
+.mcq-vbar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(135deg,#FEF2F2,#FFF1F1);border-radius:10px;margin-bottom:10px;border:1px solid rgba(220,38,38,.2)}
+.heard{font-size:11px;color:var(--g800);font-weight:700;margin-bottom:8px;padding:5px 10px;background:#F0FDF4;border-radius:7px;border:1px solid rgba(21,128,61,.2)}
+
+.svsl{-webkit-appearance:none;width:100%;height:10px;border-radius:5px;background:linear-gradient(90deg,#22C55E,#EAB308,#DC2626);outline:none;cursor:pointer}
+.svsl::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid var(--n800);cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+.pface{font-size:24px;cursor:pointer;transition:all .25s;filter:saturate(0) brightness(1.3);opacity:.4;background:none;border:none;padding:0}
+.pface.on{filter:saturate(1) brightness(1);opacity:1;transform:scale(1.35)}
+
+.trp{border-left:4px solid}.tr-r{border-color:#DC2626}.tr-a{border-color:#F59E0B}.tr-g{border-color:#22C55E}
+.emsc{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#7F1D1D,#991B1B,#DC2626);overflow:hidden}
+.emsc::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,255,255,.06),transparent 70%);animation:emp 1.5s infinite}
+@keyframes emp{0%,100%{opacity:.4}50%{opacity:1}}
+.em-ic{font-size:84px;animation:emb 1s ease infinite alternate}
+@keyframes emb{from{transform:scale(1)}to{transform:scale(1.1)}}
+.em-tok{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);border-radius:22px;padding:20px 42px;text-align:center;margin:20px 0}
+
+.qsb{background:var(--n900);width:290px;flex-shrink:0;overflow-y:auto;height:calc(100vh - 62px)}
+.qhdr{padding:15px 15px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.qpt{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .2s;position:relative}
+.qpt.on{background:rgba(255,255,255,.1)}
+.qpt:hover{background:rgba(255,255,255,.07)}
+.qpt.fresh{background:rgba(34,197,94,.12);animation:freshIn .6s ease}
+@keyframes freshIn{from{background:rgba(34,197,94,.35)}to{background:rgba(34,197,94,.12)}}
+
+.vtg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.vtc{background:var(--sl);border-radius:11px;padding:9px 10px;text-align:center;border:1px solid var(--sl2)}
+.vtv{font-size:16px;font-weight:900;color:var(--n800);line-height:1.1}
+.vtl{font-size:9px;color:var(--t3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+.soap{background:var(--sl);border-radius:9px;padding:11px 13px;margin-bottom:8px;border-left:3px solid var(--n700)}
+.soapk{font-size:9px;font-weight:800;color:var(--n700);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.fhirb{background:#0B1D3A;border-radius:12px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.7;color:#4ADE80;overflow:auto;max-height:340px;border:1px solid rgba(74,222,128,.15)}
+
+.mbig{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1px}
+.krow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--sl2)}
+.krow:last-child{border:none}
+.pdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pdot.on{background:var(--g600);animation:pon 2s infinite}
+.pdot.warn{background:var(--amb);animation:pon 1s infinite}
+.pdot.off{background:var(--r)}
+@keyframes pon{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 7px rgba(74,222,128,0)}}
+.logr{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--sl);align-items:flex-start}
+.logt{font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;font-size:10px;padding-top:1px}
+
+.ocrz{border:2.5px dashed var(--sl3);border-radius:18px;padding:30px 18px;text-align:center;cursor:pointer;transition:all .25s;background:var(--sl)}
+.ocrz:hover,.ocrz.dg{border-color:var(--n700);background:#EEF3FF}
+.stpr{display:flex;align-items:center}
+.std{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;transition:all .3s}
+.std.dn{background:linear-gradient(135deg,var(--g800),var(--g600));color:#fff}
+.std.ac{background:linear-gradient(135deg,var(--n800),var(--n600));color:#fff;box-shadow:0 3px 10px rgba(30,58,138,.35)}
+.std.pd{background:var(--sl2);color:var(--t3)}
+.stl{flex:1;height:2px;background:var(--sl2);margin:0 3px}
+.stl.dn{background:var(--g700)}
+.ail{display:flex;align-items:center;gap:9px;padding:11px 13px;background:linear-gradient(135deg,#EEF3FF,#F0FDF4);border-radius:11px;border:1px solid rgba(30,58,138,.1)}
+.aid span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--n700);margin:0 2px;animation:adp 1.2s infinite}
+.aid span:nth-child(2){animation-delay:.2s}.aid span:nth-child(3){animation-delay:.4s}
+@keyframes adp{0%,80%,100%{transform:scale(.75);opacity:.4}40%{transform:scale(1.25);opacity:1}}
+
+.abha-d{display:inline-flex;align-items:center;background:linear-gradient(135deg,var(--n900),var(--n800));color:#fff;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.tlin{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.tlin::before{content:'';position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--sl2)}
+.tlin:last-child::before{display:none}
+.tldt{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.dvd{display:flex;align-items:center;gap:10px;margin:10px 0;color:var(--t3);font-size:11px;font-weight:600}
+.dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--sl2)}
+.toast{position:fixed;bottom:88px;right:22px;padding:12px 17px;border-radius:12px;font-size:13px;font-weight:600;z-index:600;animation:tin .35s cubic-bezier(.34,1.56,.64,1);max-width:320px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.ti{background:var(--n900);color:#fff}.ts{background:linear-gradient(135deg,var(--g900),var(--g800));color:#fff}
+.te{background:linear-gradient(135deg,#7F1D1D,var(--r));color:#fff}.tw{background:linear-gradient(135deg,#78350F,var(--amb));color:#fff}
+@keyframes tin{from{transform:translateY(20px) scale(.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.fu{animation:fu .4s cubic-bezier(.34,1.2,.64,1)}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.imc{padding:0;border-radius:18px;border:2px solid var(--sl2);background:#fff;cursor:pointer;text-align:left;transition:all .3s;overflow:hidden;box-shadow:0 2px 8px rgba(11,29,58,.06);width:100%}
+.imc:hover{box-shadow:0 8px 28px rgba(11,29,58,.15);transform:translateY(-2px)}
+.imc-hd{padding:14px 18px;display:flex;align-items:center;gap:12px}
+.imc-bd{padding:10px 18px;color:var(--t2);font-size:12px;line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.help-bar{background:linear-gradient(135deg,#FFFBEB,#FEF9E7);border:1px solid rgba(245,158,11,.3);border-radius:11px;padding:10px 13px;margin-bottom:12px;display:flex;align-items:center;gap:9px;font-size:11px;color:#92400E;font-weight:600}
+
+/* ELDERLY / LOW-LITERACY ASSIST */
+.easy-assist{background:linear-gradient(135deg,#EEF7FF,#F0FDF7);border:1.5px solid rgba(21,128,61,.24);border-radius:12px;padding:10px 11px;margin-bottom:12px}
+.easy-assist-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:800;color:var(--n800)}
+.easy-assist-copy{font-size:10px;color:var(--t2);line-height:1.45;margin-top:4px}
+.easy-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.easy-actions button{flex:1;min-width:105px}
+.easy-on{box-shadow:0 0 0 4px rgba(21,128,61,.12)}
+.senior-ui .acard{max-width:500px}
+.senior-ui .vf-lbl,.senior-ui .help-bar,.senior-ui .easy-assist-h{font-size:13px}
+.senior-ui .vf-in,.senior-ui .vf-ta,.senior-ui .mcqo{font-size:17px}
+.senior-ui .btn{font-size:17px;padding:15px 22px}
+.senior-ui .icon-btn,.senior-ui .mcq-spk{font-size:16px;min-width:38px;min-height:34px;justify-content:center}
+.senior-ui .tbtn,.senior-ui .idbtn{font-size:15px;padding:12px}
+.senior-ui .vf-mic{width:36px;height:36px;font-size:17px}
+.senior-ui .vf-in,.senior-ui .vf-ta{padding-right:50px}
+
+/* CHATBOT */
+.cb-fab{position:fixed;right:22px;bottom:22px;z-index:550;display:flex;align-items:center;gap:8px;padding:12px 18px;border:none;border-radius:30px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--g800),var(--g600));box-shadow:0 8px 26px rgba(21,128,61,.45);transition:all .25s}
+.cb-fab:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(21,128,61,.55)}
+.cb-fab:active{transform:scale(.97)}
+.cb-panel{position:fixed;right:22px;bottom:84px;z-index:550;width:370px;max-width:calc(100vw - 24px);height:min(540px,calc(100vh - 110px));background:rgba(255,255,255,.98);border-radius:22px;box-shadow:0 32px 80px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.6);display:flex;flex-direction:column;overflow:hidden;animation:ci .35s cubic-bezier(.34,1.2,.64,1)}
+.cb-hdr{background:linear-gradient(135deg,var(--n900),var(--n800));padding:14px 16px;display:flex;align-items:center;gap:10px;color:#fff;flex-shrink:0}
+.cb-t{font-size:14px;font-weight:800;letter-spacing:-.2px}
+.cb-s{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;display:flex;align-items:center;gap:5px}
+.cb-on{width:6px;height:6px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;flex-shrink:0}
+.cb-x{width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.12);color:#fff;font-size:12px;flex-shrink:0;transition:all .2s}
+.cb-x:hover{background:rgba(255,255,255,.25)}
+.cb-body{flex:1;overflow-y:auto;padding:14px;background:var(--sl);display:flex;flex-direction:column;gap:10px}
+.cb-msg{display:flex;flex-direction:column;max-width:88%;animation:fu .3s ease}
+.cb-msg.me{align-self:flex-end;align-items:flex-end}
+.cb-msg.bot{align-self:flex-start;align-items:flex-start}
+.cb-b{padding:10px 13px;font-size:12.5px;line-height:1.55;white-space:pre-line;word-break:break-word}
+.cb-b.bot{background:#fff;color:var(--t1);border:1px solid var(--sl2);border-radius:14px 14px 14px 4px;box-shadow:0 2px 8px rgba(11,29,58,.05)}
+.cb-b.me{background:linear-gradient(135deg,var(--n800),var(--n700));color:#fff;border-radius:14px 14px 4px 14px}
+.cb-act{margin-top:4px}
+.cb-typing{display:flex;gap:4px;align-items:center;padding:13px 14px}
+.cb-typing i{width:6px;height:6px;border-radius:50%;background:var(--sl4);animation:cbDot 1s infinite}
+.cb-typing i:nth-child(2){animation-delay:.15s}
+.cb-typing i:nth-child(3){animation-delay:.3s}
+@keyframes cbDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.cb-chips{display:flex;gap:6px;overflow-x:auto;padding:9px 12px;background:var(--sl);border-top:1px solid var(--sl2);flex-shrink:0}
+.cb-chips::-webkit-scrollbar{height:0}
+.cb-chip{flex-shrink:0;padding:6px 11px;border-radius:16px;border:1.5px solid var(--sl3);background:#fff;color:var(--n800);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.cb-chip:hover{background:var(--n800);color:#fff;border-color:var(--n800)}
+.cb-hint{font-size:10px;color:var(--r);font-weight:600;padding:7px 14px 0;background:#fff;flex-shrink:0}
+.cb-in{display:flex;gap:8px;align-items:center;padding:10px 12px 12px;background:#fff;border-top:1px solid var(--sl2);flex-shrink:0}
+.cb-hint+.cb-in{border-top:none}
+@media(max-width:520px){.cb-fab{right:14px;bottom:14px}.cb-panel{right:10px;bottom:76px;width:calc(100vw - 20px)}}
+
+@media(max-width:900px){.hero{flex-direction:column}.hero-l{max-width:100%;padding:30px 18px 18px}.hero-r{min-width:0;padding:0 18px 30px}.hero-t{font-size:30px}.hosp-grid{grid-template-columns:1fr}.rsw .rbtn{padding:5px 9px;font-size:11px}.vtg{grid-template-columns:1fr 1fr}.qsb{width:230px}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+/* ══════ I18N ══════ */
+const T={en:{
+appName:"MediNode",sub:"AI Clinical Intake · Voice + Touch + OCR",pt:"Patient",doc:"Doctor",adm:"Admin",
+heroTitle:"Smarter Healthcare",heroTitle2:"Starts Here",
+heroSub:"AI-powered multimodal clinical intake — voice, touch and OCR — eliminating OPD bottlenecks across India",
+s1:"4,000+",s1l:"Daily Patients",s2:"<3 min",s2l:"Avg Intake",s3:"98%",s3l:"Voice Accuracy",
+nearbyTitle:"Nearby ABHA Hospitals",detectLoc:"📍 Detect My Location",detecting:"Detecting your location…",
+locFound:"Location found — hospitals sorted by distance",locErr:"Location denied — showing demo hospitals",
+retryLoc:"📍 Retry Location",
+loginTab:"Existing Patient",regTab:"New Registration",
+abhaBtn:"ABHA ID",aadhaarBtn:"Aadhaar",
+abhaLbl:"ABHA Health ID",abhaPlh:"14 digits or username@abdm",
+aadharLbl:"Aadhaar Number",aadharPlh:"12 digits, starts with 2–9",
+otpLbl:"One-Time Password",otpPlh:"Enter 6-digit OTP",
+sendOtp:"Send OTP →",verifyBtn:"Verify & Continue →",demoHint:"Demo OTP: 123456",
+cTitle:"Privacy & Consent — DPDP Act 2023",
+c1:"I consent to share my health information for clinical care at this facility",
+c2:"I agree to data processing under DPDP Act 2023 and the ABDM consent framework",
+c3:"I authorise ABHA linking so my health records stay lifelong with me",
+readAll:"🔊 Read All Aloud",selAll:"✓ Select All",
+proceed:"Agree & Continue →",
+chooseMode:"Select Consultation Type",allopathy:"Allopathy OPD",ayush:"AYUSH / Ayurveda",
+alSub:"Modern medicine · SOCRATES history · SOAP notes · Drug interaction checks",
+aySub:"Dashavidha Pariksha · Prakriti · Vikriti · Agni · Ayurvedic assessment",
+voiceHelp:"Tap 🎤 on any field to speak · Tap 🔊 to hear it read aloud",
+chief:"Describe your main problem in your own words",
+chiefPlh:"e.g. I have chest pain and difficulty breathing since yesterday…",
+s_site:"Where exactly is the pain or discomfort?",
+s_onset:"When did it start?",s_onset_opts:["Today","Yesterday","2–3 days ago","Last week","More than a week ago"],
+s_char:"Describe the nature of the pain",s_char_opts:["Sharp / Stabbing","Dull / Aching","Burning","Throbbing / Pulsating","Pressure / Tightness","Cramping"],
+s_rad:"Does the pain spread anywhere?",s_rad_opts:["Stays in one spot","Spreads to left arm","Spreads to neck or jaw","Spreads to the back","Spreads to abdomen"],
+s_assoc:"Any other symptoms? (select all that apply)",s_assoc_opts:["Nausea or Vomiting","Breathlessness","Sweating","Dizziness","Palpitations","Fever","None of these"],
+s_time:"Is it constant or does it come and go?",s_time_opts:["Constant all the time","Comes and goes","Worse in the morning","Worse at night","Worse after eating"],
+s_exac:"What makes it worse?",s_exac_opts:["Physical activity","Deep breathing","Lying down flat","Eating or drinking","Cold weather","Nothing specific"],
+s_sev:"Rate the severity from 1 to 10",
+prakriti:"What is your body constitution (Prakriti)?",prakriti_opts:["Vata — thin, dry skin, anxious","Pitta — medium build, warm, sharp","Kapha — heavy build, oily, calm","Vata-Pitta dual","Pitta-Kapha dual","Vata-Kapha dual"],
+agni:"How is your digestion (Agni)?",agni_opts:["Strong — digest anything easily","Irregular — sometimes good sometimes not","Slow — heavy feeling after meals","Variable — changes with stress"],
+koshtha:"Describe your bowel habits (Koshtha)",koshtha_opts:["Regular, once daily","Irregular and hard","Loose or watery stools","Twice or more per day"],
+nidana:"What do you think caused this (Nidana)?",nidana_opts:["Improper diet","Lack of sleep","Stress or grief","Seasonal change","Excessive exercise","Unknown"],
+vikriti:"What imbalance do you feel now (Vikriti)?",vikriti_opts:["Vata increased — dry, cold, light","Pitta increased — hot, burning","Kapha increased — heavy, congested","Mixed Vata-Pitta","Mixed Pitta-Kapha","Mixed Vata-Kapha"],
+sara:"Tissue quality (Sara)?",sara_opts:["Pravara — excellent","Madhyama — moderate","Avara — poor"],
+sattva:"Mental strength (Sattva)?",sattva_opts:["Pravara — resilient","Madhyama — moderate","Avara — easily disturbed"],
+pastHx:"Any past illnesses, surgeries or allergies?",pastHxPlh:"e.g. Diabetes for 5 years, appendix surgery 2019, allergic to penicillin…",
+meds:"What medicines are you taking now?",medsPlh:"e.g. Metformin 500mg twice daily, Amlodipine 5mg…",
+ocrTitle:"Upload Medical Documents",ocrSub:"Prescriptions · Lab reports · Discharge summaries — real OCR",
+dragDrop:"Tap to browse or take a photo",ocrScanning:"Scanning document",ocrDone:"Extraction Complete",
+summaryTitle:"Your Health Summary",tokenReady:"Token Generated",submitBtn:"Submit to Doctor →",
+submitted:"Sent to Doctor ✓",
+emergency:"EMERGENCY DETECTED",emergencySub:"Proceed to Emergency immediately. Nurse station alerted.",
+alertNurse:"Nurse Alert Sent ✓",
+bodyMap:"Tap the area where you feel pain",bodyOr:"Or describe it:",
+back:"← Back",next:"Next →",skip:"Skip & Continue →",
+patQueue:"Live Patient Queue",aiSum:"AI Summary",rx:"Prescription",fhir:"FHIR R4",
+syncEhr:"Approve & Sync to EHR",orderLabs:"Order Lab Tests",addNotes:"Add Clinical Notes",
+opdMetrics:"OPD Metrics",hw:"Hardware",compliance:"Compliance",
+avgTime:"Avg Intake Time",vol:"Daily Patients",voiceUse:"Voice Usage",
+audioOn:"Audio ON",audioOff:"Audio OFF",
+fname:"First Name",lname:"Last Name",dob:"Date of Birth",gender:"Gender",
+mobile:"Mobile Number",address:"Address",
+genders:["Male","Female","Other","Prefer not to say"],
+createAbha:"Generate ABHA ID",regBtn:"Register & Continue →",
+invalidAbha:"Invalid format. Use 14 digits or username@abdm",
+invalidAadhaar:"Invalid Aadhaar. Must be 12 digits starting with 2 to 9",
+invalidOtp:"OTP must be exactly 6 digits",otpSent:"OTP sent to your registered mobile",
+syncDone:"✓ Synced to EHR",labsDone:"✓ Lab tests ordered",notesDone:"✓ Clinical notes saved",
+uploadOk:"Document scanned successfully",ocrFail:"Could not scan — try another image",
+newPatient:"New patient arrived in queue",
+speakField:"Speak",listening:"Listening…",heard:"Heard",
+},
+hi:{
+appName:"मेडीकियोस्क",sub:"AI क्लिनिकल इंटेक · आवाज़ + टच + OCR",pt:"मरीज़",doc:"डॉक्टर",adm:"प्रशासन",
+heroTitle:"बेहतर स्वास्थ्य सेवा",heroTitle2:"यहाँ से शुरू",
+heroSub:"AI-संचालित बहुमोडल इंटेक — आवाज़, टच और OCR — भारतीय OPD की भीड़ खत्म करता है",
+s1:"4,000+",s1l:"दैनिक मरीज़",s2:"<3 मिनट",s2l:"औसत इंटेक",s3:"98%",s3l:"आवाज़ सटीकता",
+nearbyTitle:"नज़दीकी ABHA अस्पताल",detectLoc:"📍 मेरा स्थान खोजें",detecting:"स्थान खोजा जा रहा है…",
+locFound:"स्थान मिल गया — दूरी के अनुसार अस्पताल",locErr:"स्थान नहीं मिला — डेमो अस्पताल",
+retryLoc:"📍 फिर कोशिश करें",
+loginTab:"मौजूदा मरीज़",regTab:"नया पंजीकरण",
+abhaBtn:"ABHA ID",aadhaarBtn:"आधार",
+abhaLbl:"ABHA हेल्थ ID",abhaPlh:"14 अंक या username@abdm",
+aadharLbl:"आधार नंबर",aadharPlh:"12 अंक, 2–9 से शुरू",
+otpLbl:"वन-टाइम पासवर्ड",otpPlh:"6 अंक का OTP दर्ज करें",
+sendOtp:"OTP भेजें →",verifyBtn:"सत्यापित करें →",demoHint:"डेमो OTP: 123456",
+cTitle:"गोपनीयता और सहमति — DPDP अधिनियम 2023",
+c1:"मैं इस अस्पताल में चिकित्सा देखभाल के लिए अपनी स्वास्थ्य जानकारी साझा करने की सहमति देता हूं",
+c2:"मैं DPDP अधिनियम 2023 और ABDM सहमति ढांचे के तहत डेटा प्रसंस्करण से सहमत हूं",
+c3:"मैं ABHA लिंकिंग की अनुमति देता हूं ताकि मेरे रिकॉर्ड जीवनभर मेरे साथ रहें",
+readAll:"🔊 सब सुनें",selAll:"✓ सभी चुनें",
+proceed:"सहमत हूं और आगे बढ़ें →",
+chooseMode:"परामर्श प्रकार चुनें",allopathy:"एलोपैथी OPD",ayush:"आयुष / आयुर्वेद",
+alSub:"आधुनिक चिकित्सा · SOCRATES · SOAP नोट्स · दवा इंटरैक्शन जांच",
+aySub:"दशविध परीक्षा · प्रकृति · विकृति · अग्नि · आयुर्वेदिक मूल्यांकन",
+voiceHelp:"किसी भी फ़ील्ड पर 🎤 दबाकर बोलें · 🔊 दबाकर सुनें",
+chief:"अपनी मुख्य समस्या अपने शब्दों में बताएं",
+chiefPlh:"जैसे: मुझे कल से सीने में दर्द और सांस लेने में तकलीफ है…",
+s_site:"दर्द या परेशानी ठीक कहाँ है?",
+s_onset:"यह कब शुरू हुआ?",s_onset_opts:["आज","कल","2–3 दिन पहले","पिछले हफ्ते","एक हफ्ते से ज्यादा"],
+s_char:"दर्द कैसा है?",s_char_opts:["तेज / चुभने वाला","मंद / दुखने वाला","जलन","धड़कन वाला","दबाव / कसाव","ऐंठन"],
+s_rad:"क्या दर्द कहीं और फैलता है?",s_rad_opts:["एक ही जगह रहता है","बायीं बांह में फैलता है","गर्दन या जबड़े में","पीठ में","पेट में"],
+s_assoc:"कोई और लक्षण? (सभी चुनें)",s_assoc_opts:["मतली या उल्टी","सांस फूलना","पसीना आना","चक्कर","धड़कन तेज","बुखार","इनमें से कोई नहीं"],
+s_time:"क्या लगातार है या आता-जाता है?",s_time_opts:["लगातार रहता है","आता-जाता है","सुबह ज्यादा","रात को ज्यादा","खाने के बाद ज्यादा"],
+s_exac:"क्या इसे बढ़ाता है?",s_exac_opts:["शारीरिक गतिविधि","गहरी सांस लेना","सीधा लेटना","खाना-पीना","ठंडा मौसम","कुछ खास नहीं"],
+s_sev:"1 से 10 तक गंभीरता बताएं",
+prakriti:"आपकी शारीरिक प्रकृति क्या है?",prakriti_opts:["वात — पतला, रूखी त्वचा, चिंतित","पित्त — मध्यम, गर्म, तीक्ष्ण","कफ — भारी, तैलीय, शांत","वात-पित्त","पित्त-कफ","वात-कफ"],
+agni:"आपकी पाचन शक्ति कैसी है?",agni_opts:["मजबूत — सब पच जाता है","अनियमित","धीमी — खाने के बाद भारीपन","तनाव से बदलती है"],
+koshtha:"मल की आदतें कैसी हैं?",koshtha_opts:["नियमित, दिन में एक बार","अनियमित और कठोर","ढीला मल","दिन में दो या अधिक बार"],
+nidana:"आपको क्या कारण लगता है?",nidana_opts:["गलत आहार","नींद की कमी","तनाव या दुःख","मौसम बदलाव","अत्यधिक व्यायाम","पता नहीं"],
+vikriti:"अभी क्या असंतुलन महसूस होता है?",vikriti_opts:["वात बढ़ा — रूखा, ठंडा","पित्त बढ़ा — गर्म, जलन","कफ बढ़ा — भारी, जकड़न","वात-पित्त मिश्रित","पित्त-कफ मिश्रित","वात-कफ मिश्रित"],
+sara:"ऊतक गुणवत्ता (सार)?",sara_opts:["प्रवर — उत्तम","मध्यम","अवर — कमज़ोर"],
+sattva:"मानसिक शक्ति (सत्व)?",sattva_opts:["प्रवर — मज़बूत","मध्यम","अवर — कमज़ोर"],
+pastHx:"कोई पुरानी बीमारी, ऑपरेशन या एलर्जी?",pastHxPlh:"जैसे: 5 साल से शुगर, 2019 में अपेंडिक्स ऑपरेशन, पेनिसिलिन से एलर्जी…",
+meds:"अभी कौन सी दवाएं ले रहे हैं?",medsPlh:"जैसे: मेटफॉर्मिन 500mg दिन में दो बार…",
+ocrTitle:"चिकित्सा दस्तावेज़ अपलोड करें",ocrSub:"पर्चे · लैब रिपोर्ट · डिस्चार्ज सारांश — वास्तविक OCR",
+dragDrop:"चुनने के लिए टैप करें या फोटो लें",ocrScanning:"स्कैन हो रहा है",ocrDone:"निष्कर्षण पूरा",
+summaryTitle:"आपका स्वास्थ्य सारांश",tokenReady:"टोकन जनरेट हुआ",submitBtn:"डॉक्टर को भेजें →",
+submitted:"डॉक्टर को भेज दिया ✓",
+emergency:"आपातकाल पाया गया",emergencySub:"तुरंत आपातकालीन विभाग जाएं। नर्स को सूचित किया गया।",
+alertNurse:"नर्स अलर्ट भेजा ✓",
+bodyMap:"दर्द वाली जगह टैप करें",bodyOr:"या बताएं:",
+back:"← वापस",next:"आगे →",skip:"छोड़ें →",
+patQueue:"लाइव मरीज़ कतार",aiSum:"AI सारांश",rx:"पर्चा",fhir:"FHIR R4",
+syncEhr:"अनुमोदित करें और EHR में सिंक करें",orderLabs:"लैब टेस्ट आदेश दें",addNotes:"क्लिनिकल नोट्स जोड़ें",
+opdMetrics:"OPD मेट्रिक्स",hw:"हार्डवेयर",compliance:"अनुपालन",
+avgTime:"औसत इंटेक समय",vol:"दैनिक मरीज़",voiceUse:"वॉयस उपयोग",
+audioOn:"ऑडियो चालू",audioOff:"ऑडियो बंद",
+fname:"पहला नाम",lname:"अंतिम नाम",dob:"जन्म तिथि",gender:"लिंग",
+mobile:"मोबाइल नंबर",address:"पता",
+genders:["पुरुष","महिला","अन्य","बताना नहीं चाहते"],
+createAbha:"ABHA ID बनाएं",regBtn:"पंजीकरण करें →",
+invalidAbha:"अमान्य फॉर्मेट। 14 अंक या username@abdm",
+invalidAadhaar:"अमान्य आधार। 2–9 से शुरू होने वाले 12 अंक",
+invalidOtp:"OTP 6 अंकों का होना चाहिए",otpSent:"OTP आपके मोबाइल पर भेजा गया",
+syncDone:"✓ EHR में सिंक हुआ",labsDone:"✓ लैब टेस्ट आदेश दिए",notesDone:"✓ नोट्स सहेजे गए",
+uploadOk:"दस्तावेज़ सफलतापूर्वक स्कैन हुआ",ocrFail:"स्कैन नहीं हो सका",
+newPatient:"नया मरीज़ कतार में आया",
+speakField:"बोलें",listening:"सुन रहा हूं…",heard:"सुना",
+}};
+/* Single source of truth for every supported Indian locale. */
+const LANGUAGES=[
+  {id:'en',label:'English',short:'EN',locale:'en-IN'},{id:'hi',label:'Hindi',short:'हिं',locale:'hi-IN'},
+  {id:'as',label:'Assamese',short:'অসম',locale:'as-IN'},{id:'bn',label:'Bengali',short:'বাংলা',locale:'bn-IN'},
+  {id:'brx',label:'Bodo',short:'बड़ो',locale:'brx-IN'},{id:'doi',label:'Dogri',short:'डोगरी',locale:'doi-IN'},
+  {id:'gu',label:'Gujarati',short:'ગુજરાતી',locale:'gu-IN'},{id:'kn',label:'Kannada',short:'ಕನ್ನಡ',locale:'kn-IN'},
+  {id:'ks',label:'Kashmiri',short:'کٲشُر',locale:'ks-IN'},{id:'kok',label:'Konkani',short:'कोंकणी',locale:'kok-IN'},
+  {id:'mai',label:'Maithili',short:'मैथिली',locale:'mai-IN'},{id:'ml',label:'Malayalam',short:'മലയാളം',locale:'ml-IN'},
+  {id:'mr',label:'Marathi',short:'मराठी',locale:'mr-IN'},{id:'mni',label:'Manipuri',short:'মৈতৈ',locale:'mni-IN'},
+  {id:'ne',label:'Nepali',short:'नेपाली',locale:'ne-IN'},{id:'or',label:'Odia',short:'ଓଡ଼ିଆ',locale:'or-IN'},
+  {id:'pa',label:'Punjabi',short:'ਪੰਜਾਬੀ',locale:'pa-IN'},{id:'sa',label:'Sanskrit',short:'संस्कृतम्',locale:'sa-IN'},
+  {id:'sat',label:'Santali',short:'ᱥᱟᱱ',locale:'sat-IN'},{id:'sd',label:'Sindhi',short:'سنڌي',locale:'sd-IN'},
+  {id:'ta',label:'Tamil',short:'தமிழ்',locale:'ta-IN'},{id:'te',label:'Telugu',short:'తెలుగు',locale:'te-IN'},
+  {id:'ur',label:'Urdu',short:'اردو',locale:'ur-IN'}
+];
+const languageMeta=lang=>LANGUAGES.find(x=>x.id===lang)||LANGUAGES[0];
+const useT=lang=>useCallback(k=>T[lang]?.[k]??T.en[k]??k,[lang]);
+
+/* Translate the remaining legacy English copy (doctor/admin cards, demo
+   content, labels, and buttons) without changing any markup or layout.
+   Form controls are excluded. Results are cached for the browser session. */
+const pageSource=new WeakMap(),pageTranslationCache=new Map();
+const translationTarget={brx:'hi',doi:'hi',kok:'mr',mai:'hi',mni:'bn',sat:'hi'};
+const SKIP_TRANSLATE_RE=/^[-–—→✓•🔊🎤⚕📍💬\d\s]+$/u;
+async function translateOwnedCopy(source,lang){
+  if(!source||lang==='en'||SKIP_TRANSLATE_RE.test(source))return source;
+  const key=`${lang}|${source}`;
+  if(pageTranslationCache.has(key))return pageTranslationCache.get(key);
+  const target=translationTarget[lang]||lang;
+  try{
+    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(source)}`;
+    const result=await fetch(url,{credentials:'omit'}).then(r=>r.ok?r.json():Promise.reject(r.status));
+    const translated=(result?.[0]||[]).map(part=>part[0]).join('')||source;
+    pageTranslationCache.set(key,translated);
+    return translated;
+  }catch(e){
+    console.warn('MediNode UI translation unavailable',e);
+    return source;
+  }
+}
+function usePageLanguage(lang,rootRef){
+  useEffect(()=>{
+    const root=rootRef.current;if(!root)return;
+    let cancelled=false,timer;
+    document.documentElement.lang=languageMeta(lang).locale;
+    document.documentElement.dir=lang==='ur'||lang==='ks'||lang==='sd'?'rtl':'ltr';
+    const translate=async()=>{
+      const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+        const p=n.parentElement;
+        if(!p||!n.nodeValue.trim()||p.closest('script,style,textarea,input,select,option,[data-no-auto-translate]'))return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }});
+      const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+      // Only touch nodes whose live text differs from the text WE last wrote to them.
+      // React reuses the same text node across re-renders (e.g. stepping through the
+      // SOCRATES questionnaire), so a node's content can legitimately change out from
+      // under us. Treating a node's first-ever value as its permanent "source" (the old
+      // behaviour) caused this observer to silently overwrite freshly-rendered questions,
+      // options and progress counters with whatever text happened to be there originally.
+      // Instead we always re-derive "source" from the node's CURRENT value, and only skip
+      // nodes that already show exactly the output we produced last pass (so we don't
+      // re-translate our own translated text and loop forever).
+      const dirty=nodes.filter(n=>{
+        const cache=pageSource.get(n);
+        return !cache||cache.out!==n.nodeValue;
+      });
+      for(let i=0;i<dirty.length;i+=8){
+        const batch=dirty.slice(i,i+8);
+        const sources=batch.map(n=>String(n.nodeValue||'').trim());
+        const values=await Promise.all(sources.map(s=>translateOwnedCopy(s,lang)));
+        if(cancelled)return;
+        batch.forEach((n,j)=>{
+          if(!n.isConnected)return;
+          // React may have changed this node again while we were awaiting the
+          // translation above — if so, this pass is stale, skip it and let the
+          // next mutation-triggered pass (which will see the newer text) handle it.
+          if(n.nodeValue.trim()!==sources[j])return;
+          if(n.nodeValue!==values[j])n.nodeValue=values[j];
+          pageSource.set(n,{out:values[j]});
+        });
+      }
+    };
+    const observe=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(translate,80);});
+    observe.observe(root,{subtree:true,childList:true,characterData:true});
+    translate();
+    return()=>{cancelled=true;clearTimeout(timer);observe.disconnect();};
+  },[lang,rootRef]);
+}
+
+/* ══════ SPEECH ENGINE (singleton, robust) ══════ */
+const Speech={
+  ready:false,voices:[],
+  init(){
+    if(!window.speechSynthesis)return;
+    const load=()=>{this.voices=window.speechSynthesis.getVoices();this.ready=this.voices.length>0;};
+    load();
+    window.speechSynthesis.onvoiceschanged=load;
+  },
+  pickVoice(lang){
+    const want=languageMeta(lang).locale.split('-')[0];
+    let v=this.voices.find(x=>x.lang?.toLowerCase().startsWith(want+'-in'));
+    if(!v)v=this.voices.find(x=>x.lang?.toLowerCase().startsWith(want));
+    return v||null;
+  },
+  speak(text,lang){
+    if(!window.speechSynthesis||!text)return;
+    try{
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(String(text));
+      u.lang=languageMeta(lang).locale;
+      const v=this.pickVoice(lang);
+      if(v)u.voice=v;
+      u.rate=.9;u.pitch=1.02;u.volume=1;
+      // Chrome bug workaround: resume if paused
+      if(window.speechSynthesis.paused)window.speechSynthesis.resume();
+      window.speechSynthesis.speak(u);
+    }catch(e){console.warn('TTS error',e);}
+  },
+  stop(){try{window.speechSynthesis?.cancel();}catch(e){}}
+};
+Speech.init();
+
+/* ══════ VALIDATORS ══════ */
+const validAbha=v=>/^\d{14}$/.test(String(v).replace(/[-\s]/g,''))||/^[a-zA-Z0-9._]+@[a-zA-Z]+$/.test(String(v).trim());
+const validAadhaar=v=>/^[2-9]\d{11}$/.test(String(v).replace(/[\s-]/g,''));
+const validOtp=v=>/^\d{6}$/.test(String(v).trim());
+const maskAadhaar=v=>`XXXX-XXXX-${String(v).replace(/\D/g,'').slice(-4)}`;
+
+/* Convert spoken number words -> digits (for voice OTP / numbers) */
+const NUMWORDS={zero:'0',one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',seven:'7',eight:'8',nine:'9',
+  'शून्य':'0','एक':'1','दो':'2','तीन':'3','चार':'4','पांच':'5','पाँच':'5','छह':'6','छः':'6','सात':'7','आठ':'8','नौ':'9'};
+function voiceToDigits(txt){
+  let s=String(txt).toLowerCase();
+  Object.entries(NUMWORDS).forEach(([w,d])=>{s=s.replace(new RegExp(w,'g'),d);});
+  return s.replace(/\D/g,'');
+}
+
+/* ══════ SEED PATIENTS (already in queue) ══════ */
+const SEED_PATIENTS=[
+  {id:"MK-001",name:"Ramesh Kumar",age:54,gender:"Male",abha:"14-5678-9012-3456",mode:"allopathy",
+   chief:"Central chest tightness and breathlessness for 2 days",triage:"red",token:"T-001",
+   arrivedAt:"09:12",fresh:false,
+   vitals:{bp:"148/92",hr:98,spo2:94,temp:"98.6°F"},
+   intake:{chief:"Chest tightness since 2 days, difficulty breathing",site:{part:"Chest",text:"Central chest"},onset:"2–3 days ago",character:"Pressure / Tightness",radiation:"Spreads to left arm",associations:["Breathlessness","Sweating"],time:"Constant all the time",exacerbating:"Physical activity",severity:8,pastHx:"Diabetes 8 years, Hypertension 5 years",meds:"Metformin 500mg BD, Amlodipine 5mg OD, Aspirin 75mg OD"},
+   ocr:{drugs:["Metformin 500mg BD","Amlodipine 5mg OD","Aspirin 75mg OD"],
+     labs:[{n:"HbA1c",v:"8.2 %",ref:"<7%",flag:true},{n:"LDL",v:"142 mg/dL",ref:"<100",flag:true},{n:"Creatinine",v:"1.1 mg/dL",ref:"0.6–1.2",flag:false}],
+     interactions:["Aspirin + Warfarin: increased bleeding risk — review anticoagulation"]},
+   summary:"54M presenting with 2-day history of central chest tightness rated 8/10, radiating to the left arm, with associated breathlessness and diaphoresis. Background of T2DM (8y) and hypertension (5y), currently on Metformin, Amlodipine and Aspirin. Vitals show BP 148/92 mmHg, HR 98 bpm, SpO₂ 94%. Prior HbA1c 8.2% and LDL 142 mg/dL both elevated. Presentation is highly suggestive of acute coronary syndrome — urgent 12-lead ECG and serial troponins indicated."},
+  {id:"MK-002",name:"Sunita Devi",age:42,gender:"Female",abha:"14-2345-6789-0123",mode:"ayush",
+   chief:"Bilateral knee pain with morning stiffness",triage:"amber",token:"T-002",
+   arrivedAt:"09:38",fresh:false,
+   vitals:{bp:"118/76",hr:74,spo2:98,temp:"98.2°F"},
+   intake:{chief:"Both knees pain, stiff in the morning for last 3 months",prakriti:"Vata-Kapha dual",agni:"Irregular — sometimes good sometimes not",koshtha:"Irregular and hard",nidana:"Seasonal change",vikriti:"Vata increased — dry, cold, light",sara:"Madhyama — moderate",sattva:"Madhyama — moderate",pastHx:"No surgeries. Vitamin D deficiency diagnosed 2023",meds:"Calcium 500mg, Vitamin D3 60000 IU weekly"},
+   ocr:{drugs:["Calcium 500mg OD","Vitamin D3 60,000 IU weekly"],
+     labs:[{n:"Vitamin D",v:"14 ng/mL",ref:">30",flag:true},{n:"CRP",v:"18 mg/L",ref:"<5",flag:true},{n:"RA Factor",v:"Negative",ref:"Negative",flag:false}],interactions:[]},
+   summary:"42F of Vata-Kapha prakriti presenting with Sandhishula (bilateral knee pain) and Stambha (morning stiffness) of 3 months' duration, clinically consistent with Amavata. Assessment reveals Mandagni (irregular digestive fire) and Vibandha koshtha. Investigations show Vitamin D 14 ng/mL (deficient) and CRP 18 mg/L (elevated); RA factor negative. Seasonal change identified as principal Nidana. Recommend Panchakarma assessment, Guggulu-based formulations and Rasayana protocol alongside Vitamin D repletion."},
+];
+
+const DEMO_HOSPITALS=[
+  {name:"AIIMS New Delhi",baseDist:2.1,beds:48,wait:"~25 min",rating:4.8,spec:"Multi-speciality Apex",lat:28.5672,lng:77.2100},
+  {name:"Safdarjung Hospital",baseDist:3.4,beds:22,wait:"~40 min",rating:4.5,spec:"General & Emergency",lat:28.5706,lng:77.2060},
+  {name:"RML Hospital",baseDist:4.8,beds:35,wait:"~30 min",rating:4.3,spec:"General Medicine",lat:28.6268,lng:77.2218},
+  {name:"GTB Hospital",baseDist:7.2,beds:60,wait:"~50 min",rating:4.1,spec:"Multi-speciality",lat:28.6830,lng:77.3072},
+];
+const PAIN_FACES=["😊","🙂","😐","😕","😟","😣","😖","😩","😭","😱"];
+
+/* ══════ HOOKS ══════ */
+function useSpeak(lang,audioOn){
+  return useCallback((text,force)=>{
+    if(!audioOn&&!force)return;
+    Speech.speak(text,lang);
+  },[lang,audioOn]);
+}
+
+/* Speech recognition — one active instance at a time */
+function useMic(lang){
+  const [supported]=useState(()=>!!(window.SpeechRecognition||window.webkitSpeechRecognition));
+  const recRef=useRef(null);
+  const stop=useCallback(()=>{
+    try{recRef.current?.abort?.();recRef.current?.stop?.();}catch(e){}
+    recRef.current=null;
+  },[]);
+  const start=useCallback((onResult,onDone)=>{
+    if(!supported){onDone&&onDone('unsupported');return false;}
+    stop();
+    try{
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      const r=new SR();
+       r.lang=languageMeta(lang).locale;
+      r.continuous=false;r.interimResults=false;r.maxAlternatives=1;
+      r.onresult=e=>{
+        const txt=e.results?.[0]?.[0]?.transcript||'';
+        onResult&&onResult(txt);
+      };
+      r.onerror=ev=>{recRef.current=null;onDone&&onDone(ev.error||'error');};
+      r.onend=()=>{recRef.current=null;onDone&&onDone(null);};
+      recRef.current=r;
+      r.start();
+      return true;
+    }catch(e){recRef.current=null;onDone&&onDone('failed');return false;}
+  },[lang,supported,stop]);
+  useEffect(()=>()=>stop(),[stop]);
+  return{supported,start,stop};
+}
+
+/* ══════ WAVEFORM ══════ */
+function Waveform({on,color}){
+  const [h,setH]=useState(()=>Array(14).fill(5));
+  useEffect(()=>{
+    if(!on){setH(Array(14).fill(5));return;}
+    const iv=setInterval(()=>setH(Array(14).fill(0).map(()=>5+Math.random()*16)),90);
+    return()=>clearInterval(iv);
+  },[on]);
+  return <div className="wvf">{h.map((v,i)=><div key={i} className="wvb" style={{height:v,background:color||'var(--r)'}}/>)}</div>;
+}
+
+/* ══════ VOICE FIELD — every input speaks & listens ══════ */
+function VField({label,value,onChange,placeholder,lang,audioOn,multiline,error,hint,numeric,showToast,t}){
+  const [rec,setRec]=useState(false);
+  const [heard,setHeard]=useState('');
+  const speak=useSpeak(lang,audioOn);
+  const {supported,start,stop}=useMic(lang);
+
+  const handleMic=useCallback((e)=>{
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if(rec){stop();setRec(false);return;}
+    Speech.stop();
+    const ok=start(
+      txt=>{
+        const out=numeric?voiceToDigits(txt):txt;
+        onChange(out);
+        setHeard(txt);
+        setTimeout(()=>setHeard(''),4000);
+      },
+      err=>{
+        setRec(false);
+        if(err==='unsupported'&&showToast)showToast('Voice input not supported in this browser — please type','warning');
+        else if(err==='not-allowed'&&showToast)showToast('Microphone blocked — allow mic access in browser settings','error');
+      }
+    );
+    if(ok)setRec(true);
+  },[rec,start,stop,onChange,numeric,showToast]);
+
+  const handleSpeak=useCallback((e)=>{
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const say=value?.trim()?`${label}. ${value}`:label;
+    speak(say,true); // force = always speak on explicit tap
+  },[label,value,speak]);
+
+  return(
+    <div className="vf">
+      <div className="vf-lbl">
+        <span>{label}</span>
+        <div className="vf-acts">
+          <button type="button" className="icon-btn" onClick={handleSpeak} title="Read aloud">🔊</button>
+          {supported&&(
+            <button type="button" className={`icon-btn ${rec?'rec':''}`} onClick={handleMic} title="Speak your answer">
+              {rec?'🔴 Stop':'🎤 '+t('speakField')}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="vf-wrap">
+        {multiline?(
+          <textarea className={`vf-ta ${error?'err':''} ${rec?'rec':''}`} value={value}
+            onChange={e=>onChange(e.target.value)} placeholder={placeholder||''}/>
+        ):(
+          <input className={`vf-in ${error?'err':''} ${rec?'rec':''}`} value={value}
+            onChange={e=>onChange(e.target.value)} placeholder={placeholder||''}
+            inputMode={numeric?'numeric':'text'}/>
+        )}
+        {supported&&(
+          <button type="button" className={`vf-mic ${multiline?'':'vf-mic-mid'} ${rec?'rec':''}`}
+            onClick={handleMic} title={rec?'Stop':'Speak'}>{rec?'🔴':'🎤'}</button>
+        )}
+      </div>
+      {rec&&(
+        <div className="vf-rec-bar">
+          <Waveform on={true}/>
+          <span style={{fontSize:11,color:'var(--r)',fontWeight:700}}>{t('listening')}</span>
+        </div>
+      )}
+      {heard&&!rec&&<div className="heard">🎤 {t('heard')}: "{heard}"</div>}
+      {error&&<div className="vf-err">⚠ {error}</div>}
+      {hint&&!error&&<div className="vf-hint">{hint}</div>}
+    </div>
+  );
+}
+
+/* ══════ MCQ — flat buttons, no nesting ══════ */
+function MCQ({q,opts,sel,onSel,multi,lang,audioOn,t,showToast}){
+  const [rec,setRec]=useState(false);
+  const [heard,setHeard]=useState('');
+  const speak=useSpeak(lang,audioOn);
+  const {supported,start,stop}=useMic(lang);
+
+  useEffect(()=>{speak(q);},[q]);
+
+  function matchOption(txt){
+    const low=txt.toLowerCase().trim();
+    // Letter match: "a", "option b", "बी"
+    for(let i=0;i<opts.length;i++){
+      const L=String.fromCharCode(97+i);
+      if(low===L||low===`option ${L}`||low===`${L}.`||low.startsWith(L+' '))return opts[i];
+    }
+    // Number match: "one","1"
+    const num=parseInt(voiceToDigits(low));
+    if(num>=1&&num<=opts.length)return opts[num-1];
+    // Fuzzy text match — score by shared words
+    let best=null,bestScore=0;
+    opts.forEach(o=>{
+      const ow=o.toLowerCase().replace(/[^\w\s\u0900-\u097F]/g,' ').split(/\s+/).filter(w=>w.length>2);
+      let score=0;
+      ow.forEach(w=>{if(low.includes(w))score+=w.length;});
+      if(low.includes(o.toLowerCase().slice(0,6)))score+=6;
+      if(score>bestScore){bestScore=score;best=o;}
+    });
+    return bestScore>=3?best:null;
+  }
+
+  const handleMic=useCallback(e=>{
+    e?.preventDefault?.();e?.stopPropagation?.();
+    if(rec){stop();setRec(false);return;}
+    Speech.stop();
+    const ok=start(
+      txt=>{
+        setHeard(txt);
+        const m=matchOption(txt);
+        if(m){
+          if(multi){const p=sel||[];onSel(p.includes(m)?p.filter(x=>x!==m):[...p,m]);}
+          else onSel(m);
+          speak(m);
+        }else if(showToast){showToast(`Didn't catch that — heard "${txt}". Try the option letter (A, B, C…)`,'warning');}
+        setTimeout(()=>setHeard(''),5000);
+      },
+      err=>{
+        setRec(false);
+        if(err==='not-allowed'&&showToast)showToast('Microphone blocked — allow mic access','error');
+      }
+    );
+    if(ok)setRec(true);
+  },[rec,start,stop,opts,sel,multi,onSel,speak,showToast]);
+
+  const isSel=o=>multi?(sel||[]).includes(o):sel===o;
+
+  return(
+    <div className="fu">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:11,gap:8}}>
+        <p style={{fontWeight:700,fontSize:14,color:'var(--t1)',lineHeight:1.5,flex:1}}>{q}</p>
+        <div style={{display:'flex',gap:4,flexShrink:0}}>
+          <button type="button" className="icon-btn" onClick={e=>{e.stopPropagation();speak(q,true);}} title="Read question">🔊</button>
+          {supported&&<button type="button" className={`icon-btn ${rec?'rec':''}`} onClick={handleMic} title="Speak answer">{rec?'🔴 Stop':'🎤 Speak'}</button>}
+        </div>
+      </div>
+      {rec&&(
+        <div className="mcq-vbar">
+          <Waveform on={true}/>
+          <span style={{fontSize:11,color:'var(--r)',fontWeight:700}}>Say the option name or its letter (A, B, C…)</span>
+        </div>
+      )}
+      {heard&&!rec&&<div className="heard">🎤 {t('heard')}: "{heard}"</div>}
+      {opts.map((o,i)=>(
+        <div key={i} className="mcq-row">
+          <button type="button" className={`mcqo ${isSel(o)?'on':''}`}
+            onClick={()=>{speak(o);if(multi){const p=sel||[];onSel(p.includes(o)?p.filter(x=>x!==o):[...p,o]);}else onSel(o);}}>
+            <span className="mcql">{String.fromCharCode(65+i)}</span>
+            <span>{o}</span>
+          </button>
+          <button type="button" className="mcq-spk" onClick={e=>{e.stopPropagation();speak(o,true);}} title="Hear this option">🔊</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ══════ TOAST ══════ */
+function Toast({msg,type,onClose}){
+  useEffect(()=>{const x=setTimeout(onClose,4200);return()=>clearTimeout(x);},[]);
+  const c=type==='success'?'ts':type==='error'?'te':type==='warning'?'tw':'ti';
+  return<div className={`toast ${c}`}><span>{type==='success'?'✓':type==='error'?'✕':type==='warning'?'⚠':'ℹ'}</span>{msg}</div>;
+}
+
+/* ══════ BODY MAP ══════ */
+function BodyMap({sel,onSel,lang,audioOn}){
+  const speak=useSpeak(lang,audioOn);
+  const Z=[
+    {id:"Head",s:"e",cx:105,cy:26,rx:19,ry:19},
+    {id:"Neck",s:"r",x:95,y:44,w:20,h:13,rx:5},
+    {id:"Chest",s:"r",x:76,y:57,w:56,h:43,rx:8},
+    {id:"Abdomen",s:"r",x:79,y:100,w:50,h:38,rx:6},
+    {id:"Left Arm",s:"r",x:45,y:60,w:30,h:57,rx:10},
+    {id:"Right Arm",s:"r",x:133,y:60,w:30,h:57,rx:10},
+    {id:"Left Leg",s:"r",x:77,y:138,w:23,h:62,rx:8},
+    {id:"Right Leg",s:"r",x:107,y:138,w:23,h:62,rx:8},
+  ];
+  return(
+    <div style={{textAlign:'center'}}>
+      <svg viewBox="0 0 210 212" style={{width:158,display:'block',margin:'0 auto'}}>
+        <ellipse cx="105" cy="26" rx="18" ry="18" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="96" y="44" width="18" height="13" rx="5" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="77" y="57" width="54" height="43" rx="8" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="80" y="100" width="48" height="38" rx="6" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="46" y="60" width="29" height="56" rx="10" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="134" y="60" width="29" height="56" rx="10" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="78" y="138" width="22" height="62" rx="8" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        <rect x="108" y="138" width="22" height="62" rx="8" fill="#DCE8F7" stroke="#ADC2E0" strokeWidth="1.5"/>
+        {Z.map(z=>{
+          const on=sel===z.id;
+          const f=on?'rgba(220,38,38,.45)':'rgba(30,58,138,.001)';
+          const st=on?'#DC2626':'transparent';
+          const p={fill:f,stroke:st,strokeWidth:2.5,style:{cursor:'pointer',transition:'all .2s'},
+            onClick:()=>{onSel(z.id);speak(z.id);}};
+          return z.s==='e'
+            ?<ellipse key={z.id} cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry} {...p}/>
+            :<rect key={z.id} x={z.x} y={z.y} width={z.w} height={z.h} rx={z.rx||4} {...p}/>;
+        })}
+      </svg>
+      {sel&&<div style={{fontSize:11,color:'var(--r)',fontWeight:800,marginTop:4}}>📍 {sel}</div>}
+      {!sel&&<div style={{fontSize:10,color:'var(--t3)',marginTop:4}}>Tap a body area</div>}
+    </div>
+  );
+}
+
+/* ══════ OCR ══════ */
+function OCRModule({lang,t,showToast,onExtracted}){
+  const [prev,setPrev]=useState(null);const [pct,setPct]=useState(0);
+  const [busy,setBusy]=useState(false);const [res,setRes]=useState(null);const [drag,setDrag]=useState(false);
+  const fRef=useRef();
+  const DRUG_RE=/\b(metformin|amlodipine|aspirin|atorvastatin|metoprolol|lisinopril|losartan|pantoprazole|omeprazole|paracetamol|ibuprofen|clopidogrel|warfarin|ramipril|telmisartan|rosuvastatin|glimepiride|sitagliptin|digoxin|furosemide|levothyroxine|insulin|gabapentin|prednisolone)\b/gi;
+  const LAB_RE=[
+    {re:/(?:hb|h[ae]moglobin)\s*[:\-=]?\s*([\d.]+)/i,n:'Hemoglobin',u:'g/dL',lo:10},
+    {re:/(?:fbs|fasting\s*blood\s*sugar|glucose)\s*[:\-=]?\s*([\d.]+)/i,n:'Fasting Blood Sugar',u:'mg/dL',hi:140},
+    {re:/hba1c\s*[:\-=]?\s*([\d.]+)/i,n:'HbA1c',u:'%',hi:7},
+    {re:/creatinine\s*[:\-=]?\s*([\d.]+)/i,n:'Creatinine',u:'mg/dL',hi:1.2},
+    {re:/(?:vit(?:amin)?\s*d|25\s*oh)\s*[:\-=]?\s*([\d.]+)/i,n:'Vitamin D',u:'ng/mL',lo:30},
+    {re:/(?:tsh)\s*[:\-=]?\s*([\d.]+)/i,n:'TSH',u:'mIU/L',hi:4.5},
+    {re:/(?:crp)\s*[:\-=]?\s*([\d.]+)/i,n:'CRP',u:'mg/L',hi:5},
+  ];
+  function extract(txt){
+    const drugs=[...new Set((txt.match(DRUG_RE)||[]).map(s=>s.trim()))];
+    const labs=[];
+    LAB_RE.forEach(({re,n,u,lo,hi})=>{
+      const m=txt.match(re);
+      if(m){const val=parseFloat(m[1]);
+        labs.push({n,v:`${m[1]} ${u}`,flag:(lo&&val<lo)||(hi&&val>hi),ref:lo?`>${lo} ${u}`:`<${hi} ${u}`});}
+    });
+    const interactions=[];const ds=drugs.join(' ').toLowerCase();
+    if(ds.includes('aspirin')&&ds.includes('warfarin'))interactions.push('Aspirin + Warfarin: increased bleeding risk');
+    if(ds.includes('metformin')&&ds.includes('contrast'))interactions.push('Metformin + Contrast: lactic acidosis risk');
+    if(ds.includes('digoxin')&&ds.includes('furosemide'))interactions.push('Digoxin + Furosemide: hypokalemia → digoxin toxicity');
+    if(ds.includes('clopidogrel')&&ds.includes('omeprazole'))interactions.push('Clopidogrel + Omeprazole: reduced antiplatelet effect');
+    return{drugs,labs,interactions,rawLength:txt.length};
+  }
+  async function runOCR(f){
+    if(!f)return;
+    if(!f.type.startsWith('image/')){showToast(t('ocrFail'),'error');return;}
+    setPrev(URL.createObjectURL(f));setBusy(true);setPct(0);setRes(null);
+    try{
+      const worker=await Tesseract.createWorker(lang==='hi'?'hin':'eng',1,{
+        logger:m=>{if(m.status==='recognizing text')setPct(Math.round((m.progress||0)*100));}
+      });
+      const {data:{text}}=await worker.recognize(f);
+      await worker.terminate();
+      const ex=extract(text||'');
+      setRes(ex);onExtracted(ex);
+      showToast(t('uploadOk'),'success');
+    }catch(e){console.error(e);showToast(t('ocrFail'),'error');}
+    finally{setBusy(false);}
+  }
+  return(
+    <div className="fu">
+      <input ref={fRef} type="file" accept="image/*" capture="environment" style={{display:'none'}}
+        onChange={e=>{const f=e.target.files?.[0];if(f)runOCR(f);e.target.value='';}}/>
+      <div className={`ocrz ${drag?'dg':''}`}
+        onDragOver={e=>{e.preventDefault();setDrag(true);}}
+        onDragLeave={()=>setDrag(false)}
+        onDrop={e=>{e.preventDefault();setDrag(false);runOCR(e.dataTransfer.files?.[0]);}}
+        onClick={()=>fRef.current?.click()}>
+        <div style={{fontSize:42,marginBottom:9}}>📄</div>
+        <p style={{fontWeight:700,fontSize:14,color:'var(--t2)',marginBottom:3}}>{t('dragDrop')}</p>
+        <p style={{fontSize:11,color:'var(--t3)'}}>JPEG · PNG · WebP · Camera</p>
+      </div>
+      {prev&&(
+        <div style={{marginTop:13,display:'flex',gap:12,flexWrap:'wrap',alignItems:'flex-start'}}>
+          <img src={prev} alt="" style={{width:112,borderRadius:10,border:'2px solid var(--sl2)',flexShrink:0}}/>
+          <div style={{flex:1,minWidth:160}}>
+            {busy&&(
+              <div>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+                  <span style={{fontSize:12,fontWeight:700}}>{t('ocrScanning')}…</span>
+                  <span style={{fontSize:12,fontWeight:900,color:'var(--g800)'}}>{pct}%</span>
+                </div>
+                <div className="pgb"><div className="pgf pgf-n" style={{width:pct+'%'}}/></div>
+                <div className="ail" style={{marginTop:9}}>
+                  <div className="aid"><span/><span/><span/></div>
+                  <span style={{fontSize:11,color:'var(--n800)',fontWeight:500}}>AI extracting medical entities…</span>
+                </div>
+              </div>
+            )}
+            {res&&!busy&&(
+              <div className="fu">
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:9}}>
+                  <span style={{fontSize:16}}>✅</span>
+                  <span style={{fontWeight:800,color:'var(--g800)',fontSize:13}}>{t('ocrDone')}</span>
+                </div>
+                {res.drugs.length>0&&<div style={{marginBottom:9}}>
+                  <div style={{fontSize:10,fontWeight:800,color:'var(--n800)',textTransform:'uppercase',marginBottom:5}}>💊 Medications</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:4}}>{res.drugs.map((d,i)=><span key={i} className="bdg bdg-b">{d}</span>)}</div>
+                </div>}
+                {res.labs.length>0&&<div style={{marginBottom:9}}>
+                  <div style={{fontSize:10,fontWeight:800,color:'var(--n800)',textTransform:'uppercase',marginBottom:5}}>🔬 Lab Values</div>
+                  {res.labs.map((l,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid var(--sl2)'}}>
+                    <span style={{fontSize:11}}>{l.n}: <b>{l.v}</b></span>
+                    {l.flag&&<span className="bdg bdg-r">⚠ Abnormal</span>}
+                  </div>)}
+                </div>}
+                {res.interactions.length>0&&<div style={{background:'var(--rp)',borderRadius:9,padding:9}}>
+                  <div style={{fontSize:10,fontWeight:800,color:'var(--r)',marginBottom:3}}>⚠ Drug Interactions</div>
+                  {res.interactions.map((x,i)=><div key={i} style={{fontSize:11,color:'var(--r)'}}>{x}</div>)}
+                </div>}
+                {!res.drugs.length&&!res.labs.length&&<div style={{fontSize:11,color:'var(--t3)'}}>Text extracted but no known medications or lab values matched.</div>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════ NEARBY HOSPITALS — real geolocation ══════ */
+function NearbyHospitals({t,lang,audioOn,sel,onSel,showToast}){
+  const [st,setSt]=useState('idle');
+  const [loc,setLoc]=useState(null);
+  const [list,setList]=useState(DEMO_HOSPITALS.map(h=>({...h,dist:h.baseDist.toFixed(1)+' km'})));
+  const speak=useSpeak(lang,audioOn);
+
+  function haversine(a1,o1,a2,o2){
+    const R=6371,dLa=(a2-a1)*Math.PI/180,dLo=(o2-o1)*Math.PI/180;
+    const x=Math.sin(dLa/2)**2+Math.cos(a1*Math.PI/180)*Math.cos(a2*Math.PI/180)*Math.sin(dLo/2)**2;
+    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+  }
+  function detect(){
+    if(!navigator.geolocation){setSt('err');showToast&&showToast('Geolocation not supported','warning');return;}
+    setSt('loading');
+    navigator.geolocation.getCurrentPosition(
+      pos=>{
+        const {latitude:la,longitude:lo}=pos.coords;
+        setLoc({la,lo});
+        const sorted=DEMO_HOSPITALS
+          .map(h=>({...h,distNum:haversine(la,lo,h.lat,h.lng)}))
+          .sort((a,b)=>a.distNum-b.distNum)
+          .map(h=>({...h,dist:h.distNum.toFixed(1)+' km'}));
+        setList(sorted);setSt('ok');
+        speak(`Found ${sorted.length} A B H A hospitals near you. Nearest is ${sorted[0].name}, ${sorted[0].dist} away.`);
+        showToast&&showToast(`Location found — nearest: ${sorted[0].name}`,'success');
+      },
+      err=>{
+        setSt('err');
+        const m=err.code===1?'Location permission denied':'Could not get location';
+        showToast&&showToast(m+' — showing demo hospitals','warning');
+      },
+      {timeout:9000,enableHighAccuracy:true,maximumAge:60000}
+    );
+  }
+  return(
+    <div className="hosp-sec">
+      <div className="hosp-h"><span style={{fontSize:13}}>📍</span>{t('nearbyTitle')}</div>
+      <button type="button" className="loc-btn" onClick={detect} disabled={st==='loading'}>
+        {st==='loading'&&<><span className="spin"/>{t('detecting')}</>}
+        {st==='idle'&&t('detectLoc')}
+        {st==='ok'&&<>✓ {loc.la.toFixed(3)}, {loc.lo.toFixed(3)}</>}
+        {st==='err'&&t('retryLoc')}
+      </button>
+      {st==='ok'&&<p style={{fontSize:10,color:'var(--g800)',fontWeight:700,marginBottom:6}}>✓ {t('locFound')}</p>}
+      {st==='err'&&<p style={{fontSize:10,color:'var(--amb)',fontWeight:700,marginBottom:6}}>⚠ {t('locErr')}</p>}
+      <div className="hosp-grid">
+        {list.map((h,i)=>(
+          <div key={h.name} className={`hosp-c ${sel===i?'sel':''}`}
+            onClick={()=>{onSel(i,h);speak(`${h.name}, ${h.dist} away, wait time ${h.wait}`);}}>
+            <div className="hosp-b">ABHA ✓</div>
+            <div className="hosp-n">{h.name}</div>
+            <div className="hosp-m">{h.spec}<br/>📍{h.dist} · ⏱{h.wait} · ⭐{h.rating}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════ CONSENT ══════ */
+function ConsentGate({t,lang,audioOn,onAccept}){
+  const [ck,setCk]=useState([false,false,false]);
+  const speak=useSpeak(lang,audioOn);
+  const items=[t('c1'),t('c2'),t('c3')];
+  useEffect(()=>{speak(t('cTitle')+'. '+items.join('. '));},[]);
+  const all=ck[0]&&ck[1]&&ck[2];
+  return(
+    <div className="fu">
+      <div className="csnt">
+        <div className="csnt-h">🔒 {t('cTitle')}</div>
+        {items.map((it,i)=>(
+          <div key={i} className="csnt-row">
+            <div className="csnt-hit" onClick={()=>setCk(p=>p.map((v,j)=>j===i?!v:v))}>
+              <div className={`cbox ${ck[i]?'ck':''}`}/>
+              <span className="csnt-tx">{it}</span>
+            </div>
+            <button type="button" className="icon-btn" onClick={e=>{e.stopPropagation();speak(it,true);}} title="Hear this">🔊</button>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'flex',gap:6,marginBottom:11,flexWrap:'wrap'}}>
+        <button type="button" className="btn btn-gh btn-sm" onClick={()=>speak(items.join('. '),true)}>{t('readAll')}</button>
+        <button type="button" className="btn btn-gh btn-sm" onClick={()=>{setCk([true,true,true]);speak('All consents accepted');}}>{t('selAll')}</button>
+      </div>
+      <div style={{fontSize:11,color:'var(--t3)',marginBottom:11,padding:'9px 12px',background:'var(--sl)',borderRadius:9,lineHeight:1.6}}>
+        🔒 DPDP Act 2023 · ABDM compliant. Data encrypted on this terminal. Aadhaar shown as XXXX-XXXX-XXXX. Session auto-wipes after 30 minutes.
+      </div>
+      <button type="button" className={`btn btn-w btn-lg ${all?'btn-p':'btn-gh'}`} disabled={!all} onClick={onAccept}>
+        {all?t('proceed'):`Accept all — ${ck.filter(Boolean).length}/3 selected`}
+      </button>
+    </div>
+  );
+}
+
+/* ══════ ELDERLY / LOW-LITERACY ASSIST ══════ */
+function ElderAssist({lang,easy,onEasyChange,audioOn,onToggleAudio,family,onFamilyChange,relation,onRelationChange}){
+  const hi=lang==='hi';
+  const say=()=>Speech.speak(hi?'आप बोलकर या बड़े बटन दबाकर जानकारी भर सकते हैं।':'You can speak your answers or use the large buttons.',lang);
+  return <div className={`easy-assist ${easy?'easy-on':''}`}>
+    <div className="easy-assist-h"><span>🧓 {hi?'आसान मोड — बुज़ुर्गों के लिए':'Easy mode — for elderly users'}</span><span>{easy?'✓ ON':''}</span></div>
+    <div className="easy-assist-copy">{hi?'बड़ा टेक्स्ट, बड़े बटन और हर सवाल के लिए आवाज़ सहायता।':'Large text, large touch targets and voice help for every question.'}</div>
+    <div className="easy-actions">
+      <button type="button" className={`btn btn-sm ${easy?'btn-g':'btn-o'}`} onClick={()=>{onEasyChange(!easy);if(!easy)say();}}>👁️ {easy?(hi?'आसान मोड चालू':'Easy mode on'):(hi?'बड़ा टेक्स्ट':'Large text')}</button>
+      <button type="button" className="btn btn-gh btn-sm" onClick={()=>{if(!audioOn)onToggleAudio();say();}}>🔊 {hi?'बोलकर भरें':'Speak answers'}</button>
+      <button type="button" className={`btn btn-sm ${family?'btn-p':'btn-gh'}`} onClick={()=>onFamilyChange(!family)}>👨‍👩‍👧 {hi?'परिवार के लिए भरें':'Fill for family'}</button>
+    </div>
+    {family&&<div style={{marginTop:9,display:'flex',alignItems:'center',gap:7}}>
+      <span style={{fontSize:11,fontWeight:700,color:'var(--t2)',whiteSpace:'nowrap'}}>{hi?'रिश्ता:':'Relation:'}</span>
+      <select className="vf-in" style={{padding:'7px 10px',fontSize:11}} value={relation} onChange={e=>onRelationChange(e.target.value)}>
+        <option>{hi?'बेटा / बेटी':'Son / Daughter'}</option><option>{hi?'पति / पत्नी':'Spouse'}</option><option>{hi?'देखभालकर्ता':'Caregiver'}</option><option>{hi?'अन्य':'Other'}</option>
+      </select>
+    </div>}
+  </div>;
+}
+
+/* ══════ PATIENT LOGIN ══════ */
+function PatientLogin({lang,t,audioOn,showToast,onLogin,easy,onEasyChange,onToggleAudio}){
+  const [tab,setTab]=useState('login');
+  const [idType,setIdType]=useState('abha');
+  const [idVal,setIdVal]=useState('');
+  const [otp,setOtp]=useState('');
+  const [otpSent,setOtpSent]=useState(false);
+  const [hSel,setHSel]=useState(null);const [hData,setHData]=useState(null);
+  const [errs,setErrs]=useState({});
+  const [reg,setReg]=useState({fname:'',lname:'',dob:'',gender:'',mobile:'',address:''});
+  const [rErrs,setRErrs]=useState({});
+  const [abha,setAbha]=useState('');
+  const [rStep,setRStep]=useState('info');
+  const [family,setFamily]=useState(false);
+  const [relation,setRelation]=useState(lang==='hi'?'बेटा / बेटी':'Son / Daughter');
+  const speak=useSpeak(lang,audioOn);
+
+  function checkId(){
+    if(idType==='abha'&&!validAbha(idVal)){setErrs({id:t('invalidAbha')});speak(t('invalidAbha'),true);return false;}
+    if(idType==='aadhaar'&&!validAadhaar(idVal)){setErrs({id:t('invalidAadhaar')});speak(t('invalidAadhaar'),true);return false;}
+    setErrs({});return true;
+  }
+  function sendOtp(){
+    if(!checkId())return;
+    setOtpSent(true);showToast(t('otpSent')+' — Demo: 123456','success');
+    speak('O T P sent. Enter one two three four five six.');
+  }
+  function verify(){
+    if(!validOtp(otp)){setErrs({otp:t('invalidOtp')});speak(t('invalidOtp'),true);return;}
+    if(otp.trim()!=='123456'){setErrs({otp:'Incorrect OTP — Demo hint: 123456'});return;}
+    onLogin({
+      name:"Ramesh Kumar",age:54,gender:"Male",
+      abha:idType==='abha'?idVal:'14-5678-9012-3456',
+      displayId:idType==='aadhaar'?maskAadhaar(idVal):idVal,
+      hospital:hData,returning:true
+    });
+  }
+  function checkReg(){
+    const e={};
+    if(!reg.fname.trim())e.fname='Required';
+    if(!reg.lname.trim())e.lname='Required';
+    if(!reg.dob)e.dob='Required';
+    if(!reg.gender)e.gender='Required';
+    if(!/^\d{10}$/.test(reg.mobile.replace(/\D/g,'')))e.mobile='Enter a valid 10-digit mobile number';
+    setRErrs(e);return!Object.keys(e).length;
+  }
+  function makeAbha(){
+    const n=`14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`;
+    setAbha(n);showToast('ABHA Health ID created successfully','success');
+    speak('Your new A B H A I D is '+n.replace(/-/g,' '));
+  }
+  function submitReg(){
+    if(!checkReg())return;
+    if(!abha){showToast('Please generate your ABHA ID first','error');speak('Please generate your A B H A I D first',true);return;}
+    setRStep('consent');
+  }
+  const age=reg.dob?Math.max(0,new Date().getFullYear()-new Date(reg.dob).getFullYear()):null;
+
+  return(
+    <div className="hero">
+      <div className="hero-l">
+        <div className="hero-badge"><span className="hero-dot"/>&nbsp;AI · Voice · OCR · ABDM · FHIR R4</div>
+        <h1 className="hero-t">{t('heroTitle')}<br/><span>{t('heroTitle2')}</span></h1>
+        <p className="hero-s">{t('heroSub')}</p>
+        <div className="hero-stats">
+          {[[t('s1'),t('s1l')],[t('s2'),t('s2l')],[t('s3'),t('s3l')]].map(([v,l],i)=>(
+            <div key={i}><div className="hstat-v">{v}</div><div className="hstat-l">{l}</div></div>
+          ))}
+        </div>
+        <div className="hero-pills">
+          {['🎤 Every field voice-enabled','🔊 Every option speaks','📄 Real Tesseract OCR','📍 Live GPS hospitals','🌐 हिंदी + English','🏥 ABHA linked','🔒 DPDP 2023','⚕ SOCRATES','🌿 Dashavidha'].map((f,i)=><div key={i} className="hpill">{f}</div>)}
+        </div>
+      </div>
+
+      <div className="hero-r">
+        <div className="acard">
+          <div className="acard-hdr">
+            <div style={{display:'flex',alignItems:'center',gap:9,position:'relative',zIndex:2}}>
+              <div className="logo-ic" style={{width:30,height:30,fontSize:15}}>⚕</div>
+              <div>
+                <div style={{color:'#fff',fontWeight:900,fontSize:15}}>MediNode v4</div>
+                <div style={{color:'rgba(255,255,255,.5)',fontSize:10}}>Ayushman Bharat Digital Health Mission</div>
+              </div>
+              <div className="abha-chip" style={{marginLeft:'auto'}}>ABDM ✓</div>
+            </div>
+          </div>
+          <div className="acard-body">
+            <NearbyHospitals t={t} lang={lang} audioOn={audioOn} sel={hSel} showToast={showToast}
+              onSel={(i,h)=>{setHSel(i);setHData(h);}}/>
+            <ElderAssist lang={lang} easy={easy} onEasyChange={onEasyChange} audioOn={audioOn} onToggleAudio={onToggleAudio}
+              family={family} onFamilyChange={setFamily} relation={relation} onRelationChange={setRelation}/>
+            <div className="dvd">{tab==='login'?'Sign In':'Register'}</div>
+            <div className="help-bar">💡 {t('voiceHelp')}</div>
+            <div className="tbar">
+              <button type="button" className={`tbtn ${tab==='login'?'on':''}`} onClick={()=>{setTab('login');setRStep('info');}}>{t('loginTab')}</button>
+              <button type="button" className={`tbtn ${tab==='reg'?'on':''}`} onClick={()=>{setTab('reg');setRStep('info');}}>{t('regTab')}</button>
+            </div>
+
+            {tab==='login'&&(
+              <div className="fu">
+                <div className="idbar">
+                  <button type="button" className={`idbtn ${idType==='abha'?'on':''}`} onClick={()=>{setIdType('abha');setIdVal('');setErrs({});}}>🆔 {t('abhaBtn')}</button>
+                  <button type="button" className={`idbtn ${idType==='aadhaar'?'on':''}`} onClick={()=>{setIdType('aadhaar');setIdVal('');setErrs({});}}>📋 {t('aadhaarBtn')}</button>
+                </div>
+                <VField t={t} label={idType==='abha'?t('abhaLbl'):t('aadharLbl')} value={idVal} onChange={setIdVal}
+                  placeholder={idType==='abha'?t('abhaPlh'):t('aadharPlh')} lang={lang} audioOn={audioOn}
+                  error={errs.id} showToast={showToast} numeric={idType==='aadhaar'}/>
+                {!otpSent
+                  ?<button type="button" className="btn btn-p btn-w btn-lg" onClick={sendOtp}>{t('sendOtp')}</button>
+                  :<>
+                    <VField t={t} label={t('otpLbl')} value={otp} onChange={v=>setOtp(v.replace(/\D/g,'').slice(0,6))}
+                      placeholder={t('otpPlh')} lang={lang} audioOn={audioOn} error={errs.otp}
+                      hint={t('demoHint')} numeric showToast={showToast}/>
+                    <button type="button" className="btn btn-g btn-w btn-lg" onClick={verify}>{t('verifyBtn')}</button>
+                  </>}
+              </div>
+            )}
+
+            {tab==='reg'&&rStep==='info'&&(
+              <div className="fu">
+                <div className="g2">
+                  <VField t={t} label={t('fname')+' *'} value={reg.fname} onChange={v=>setReg(p=>({...p,fname:v}))} placeholder="First name" lang={lang} audioOn={audioOn} error={rErrs.fname} showToast={showToast}/>
+                  <VField t={t} label={t('lname')+' *'} value={reg.lname} onChange={v=>setReg(p=>({...p,lname:v}))} placeholder="Last name" lang={lang} audioOn={audioOn} error={rErrs.lname} showToast={showToast}/>
+                </div>
+                <div className="g2">
+                  <div className="vf">
+                    <div className="vf-lbl"><span>{t('dob')} *</span></div>
+                    <input type="date" className={`vf-in ${rErrs.dob?'err':''}`} style={{paddingRight:13}} value={reg.dob} onChange={e=>setReg(p=>({...p,dob:e.target.value}))}/>
+                    {rErrs.dob&&<div className="vf-err">⚠ {rErrs.dob}</div>}
+                    {age!==null&&!rErrs.dob&&<div className="vf-hint">Age: {age} years</div>}
+                  </div>
+                  <div className="vf">
+                    <div className="vf-lbl"><span>{t('gender')} *</span></div>
+                    <select className={`vf-in ${rErrs.gender?'err':''}`} style={{paddingRight:13}} value={reg.gender} onChange={e=>setReg(p=>({...p,gender:e.target.value}))}>
+                      <option value="">Select…</option>
+                      {t('genders').map((g,i)=><option key={i} value={g}>{g}</option>)}
+                    </select>
+                    {rErrs.gender&&<div className="vf-err">⚠ {rErrs.gender}</div>}
+                  </div>
+                </div>
+                <VField t={t} label={t('mobile')+' *'} value={reg.mobile} onChange={v=>setReg(p=>({...p,mobile:v.replace(/\D/g,'').slice(0,10)}))}
+                  placeholder="10-digit mobile" lang={lang} audioOn={audioOn} error={rErrs.mobile} numeric showToast={showToast}/>
+                <VField t={t} label={t('address')} value={reg.address} onChange={v=>setReg(p=>({...p,address:v}))}
+                  placeholder="House, street, city, PIN" lang={lang} audioOn={audioOn} showToast={showToast}/>
+                <div style={{background:'linear-gradient(135deg,#EEF3FF,#F0FDF7)',borderRadius:11,padding:12,marginBottom:11,border:'1px solid rgba(30,58,138,.12)'}}>
+                  <div style={{fontSize:10,fontWeight:800,color:'var(--n800)',marginBottom:7,textTransform:'uppercase'}}>🏥 Create Your ABHA Health ID</div>
+                  {abha
+                    ?<div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                       <span className="abha-d">{abha}</span>
+                       <span style={{color:'var(--g800)',fontWeight:700,fontSize:11}}>✓ Ready</span>
+                       <button type="button" className="icon-btn" onClick={()=>speak('Your A B H A I D is '+abha.replace(/-/g,' '),true)}>🔊</button>
+                     </div>
+                    :<button type="button" className="btn btn-o btn-sm" onClick={makeAbha}>{t('createAbha')}</button>}
+                </div>
+                {family&&<div className="help-bar">👨‍👩‍👧 {lang==='hi'?`${relation} किसी परिवार सदस्य की ओर से यह फॉर्म भर रहे हैं।`:`${relation} is filling this form on behalf of a family member.`}</div>}
+                <button type="button" className="btn btn-p btn-w btn-lg" onClick={submitReg}>{t('regBtn')}</button>
+              </div>
+            )}
+
+            {tab==='reg'&&rStep==='consent'&&(
+              <div className="fu">
+                <ConsentGate t={t} lang={lang} audioOn={audioOn}
+                  onAccept={()=>onLogin({name:`${reg.fname} ${reg.lname}`.trim(),age:age||30,gender:reg.gender||'Other',
+                    abha,displayId:abha,mobile:reg.mobile,address:reg.address,hospital:hData,consentDone:true,isNew:true,
+                    familyAssisted:family,assistantRelation:family?relation:null})}/>
+                <button type="button" className="btn btn-gh btn-sm" style={{marginTop:8}} onClick={()=>setRStep('info')}>{t('back')}</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════ INTAKE MODE ══════ */
+function IntakeMode({t,lang,audioOn,onSelect}){
+  const speak=useSpeak(lang,audioOn);
+  useEffect(()=>{speak('Please choose your consultation type. Allopathy O P D, or A Y U S H Ayurveda.');},[]);
+  const M=[
+    {id:'allopathy',icon:'🩺',title:t('allopathy'),sub:t('alSub'),badge:'Modern Medicine',g:'linear-gradient(135deg,var(--n900),var(--n800))'},
+    {id:'ayush',icon:'🌿',title:t('ayush'),sub:t('aySub'),badge:'Ayurveda · Naturopathy',g:'linear-gradient(135deg,#064E3B,var(--g800))'},
+  ];
+  return(
+    <div style={{maxWidth:550,margin:'0 auto',padding:'30px 18px'}} className="fu">
+      <div style={{textAlign:'center',marginBottom:24}}>
+        <h2 style={{fontSize:20,fontWeight:900,color:'var(--n900)',marginBottom:4}}>{t('chooseMode')}</h2>
+        <button type="button" className="icon-btn" onClick={()=>speak(t('chooseMode'),true)}>🔊 Read aloud</button>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:14}}>
+        {M.map(m=>(
+          <button key={m.id} type="button" className="imc" onClick={()=>{speak(m.title);onSelect(m.id);}}>
+            <div className="imc-hd" style={{background:m.g}}>
+              <span style={{fontSize:33}}>{m.icon}</span>
+              <div>
+                <div style={{color:'#fff',fontWeight:900,fontSize:17}}>{m.title}</div>
+                <div style={{background:'rgba(255,255,255,.2)',color:'#fff',fontSize:10,fontWeight:700,padding:'3px 9px',borderRadius:12,marginTop:5,display:'inline-block'}}>{m.badge}</div>
+              </div>
+            </div>
+            <div className="imc-bd">{m.sub}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════ SOCRATES FLOW ══════ */
+function SOCRATESFlow({t,lang,audioOn,showToast,onComplete}){
+  const [i,setI]=useState(0);
+  const [d,setD]=useState({});
+  const [bodyPart,setBodyPart]=useState('');
+  const [siteTxt,setSiteTxt]=useState('');
+  const [free,setFree]=useState('');
+  const [sev,setSev]=useState(5);
+  const speak=useSpeak(lang,audioOn);
+
+  const S=[
+    {k:'chief',type:'text',q:t('chief'),ph:t('chiefPlh')},
+    {k:'site',type:'body',q:t('s_site')},
+    {k:'onset',type:'mcq',q:t('s_onset'),o:t('s_onset_opts')},
+    {k:'character',type:'mcq',q:t('s_char'),o:t('s_char_opts')},
+    {k:'radiation',type:'mcq',q:t('s_rad'),o:t('s_rad_opts')},
+    {k:'associations',type:'multi',q:t('s_assoc'),o:t('s_assoc_opts')},
+    {k:'time',type:'mcq',q:t('s_time'),o:t('s_time_opts')},
+    {k:'exacerbating',type:'mcq',q:t('s_exac'),o:t('s_exac_opts')},
+    {k:'severity',type:'sev',q:t('s_sev')},
+    {k:'pastHx',type:'text',q:t('pastHx'),ph:t('pastHxPlh')},
+    {k:'meds',type:'text',q:t('meds'),ph:t('medsPlh')},
+  ];
+  const cur=S[i];
+  useEffect(()=>{setFree('');setSiteTxt('');},[i]);
+
+  function emergencyCheck(x){
+    const txt=`${x.chief||''} ${x.site?.part||''} ${x.site?.text||''}`.toLowerCase();
+    const chest=/chest|सीन|seene|heart|दिल/.test(txt);
+    const stroke=/stroke|paralysis|face droop|slurred|can.?t speak|लकवा/.test(txt);
+    const tight=x.character===t('s_char_opts')[4];
+    const arm=x.radiation===t('s_rad_opts')[1]||x.radiation===t('s_rad_opts')[2];
+    const breath=(x.associations||[]).includes(t('s_assoc_opts')[1]);
+    return stroke||(chest&&tight&&(arm||breath))||(chest&&x.severity>=8);
+  }
+  function go(val){
+    const nd={...d,[cur.k]:val};setD(nd);
+    if(i===S.length-1)onComplete(nd,emergencyCheck(nd));
+    else setI(i+1);
+  }
+  const pct=((i+1)/S.length)*100;
+
+  return(
+    <div style={{maxWidth:600,margin:'0 auto',padding:'18px 16px'}} className="fu">
+      <div style={{marginBottom:16}}>
+        <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+          <span style={{fontSize:12,fontWeight:700,color:'var(--t2)'}}>SOCRATES Clinical History — {i+1} / {S.length}</span>
+          <span style={{fontSize:12,fontWeight:900,color:'var(--g800)'}}>{Math.round(pct)}%</span>
+        </div>
+        <div className="pgb" style={{height:7}}><div className="pgf pgf-n" style={{width:pct+'%'}}/></div>
+        <div className="stpr" style={{marginTop:8}}>
+          {S.map((s,x)=><React.Fragment key={s.k}>
+            <div className={`std ${x<i?'dn':x===i?'ac':'pd'}`} style={{width:20,height:20,fontSize:8}}>{x<i?'✓':x+1}</div>
+            {x<S.length-1&&<div className={`stl ${x<i?'dn':''}`}/>}
+          </React.Fragment>)}
+        </div>
+      </div>
+
+      <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:11}}>
+        <div className="ail" style={{flex:1}}>
+          <div style={{width:29,height:29,borderRadius:9,background:'linear-gradient(135deg,var(--n800),var(--n600))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>🤖</div>
+          <div>
+            <div style={{fontSize:11,fontWeight:800,color:'var(--n800)'}}>AI Clinical Assistant</div>
+            <div style={{fontSize:9,color:'var(--t3)'}}>Voice + Touch · SOCRATES</div>
+          </div>
+        </div>
+        <button type="button" className="icon-btn" onClick={()=>speak(cur.q,true)} title="Read question">🔊 Read</button>
+      </div>
+
+      <div className="card" style={{padding:18,marginBottom:11}}>
+        {cur.type==='text'&&(
+          <div>
+            <VField t={t} label={cur.q} value={free} onChange={setFree} placeholder={cur.ph}
+              lang={lang} audioOn={audioOn} multiline showToast={showToast}/>
+            <button type="button" className="btn btn-p btn-w" style={{marginTop:8}}
+              disabled={cur.k!=='chief'?false:!free.trim()} onClick={()=>go(free.trim()||'Not provided')}>{t('next')}</button>
+          </div>
+        )}
+        {cur.type==='body'&&(
+          <div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14,gap:8}}>
+              <p style={{fontWeight:700,fontSize:14,lineHeight:1.5,flex:1}}>{cur.q}</p>
+              <button type="button" className="icon-btn" onClick={()=>speak(cur.q,true)}>🔊</button>
+            </div>
+            <div style={{display:'flex',gap:14,alignItems:'flex-start',flexWrap:'wrap'}}>
+              <BodyMap sel={bodyPart} onSel={setBodyPart} lang={lang} audioOn={audioOn}/>
+              <div style={{flex:1,minWidth:150}}>
+                <VField t={t} label={t('bodyOr')} value={siteTxt} onChange={setSiteTxt}
+                  placeholder="e.g. left side of chest…" lang={lang} audioOn={audioOn} showToast={showToast}/>
+              </div>
+            </div>
+            <button type="button" className="btn btn-p btn-w" style={{marginTop:12}}
+              disabled={!bodyPart&&!siteTxt.trim()} onClick={()=>go({part:bodyPart,text:siteTxt.trim()})}>{t('next')}</button>
+          </div>
+        )}
+        {(cur.type==='mcq'||cur.type==='multi')&&(
+          <div>
+            <MCQ q={cur.q} opts={cur.o} sel={d[cur.k]} lang={lang} audioOn={audioOn} t={t} showToast={showToast}
+              multi={cur.type==='multi'}
+              onSel={v=>{if(cur.type==='multi')setD(p=>({...p,[cur.k]:v}));else go(v);}}/>
+            {cur.type==='multi'&&
+              <button type="button" className="btn btn-p btn-w" style={{marginTop:12}}
+                disabled={!(d[cur.k]||[]).length} onClick={()=>go(d[cur.k]||[])}>{t('next')}</button>}
+          </div>
+        )}
+        {cur.type==='sev'&&(
+          <div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16,gap:8}}>
+              <p style={{fontWeight:700,fontSize:14,lineHeight:1.5,flex:1}}>{cur.q}</p>
+              <button type="button" className="icon-btn" onClick={()=>speak(cur.q,true)}>🔊</button>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-evenly',marginBottom:12}}>
+              {PAIN_FACES.map((f,x)=>(
+                <button key={x} type="button" className={`pface ${sev-1===x?'on':''}`}
+                  onClick={()=>{setSev(x+1);speak(`${x+1} out of 10`);}}>{f}</button>
+              ))}
+            </div>
+            <input type="range" className="svsl" min={1} max={10} value={sev} onChange={e=>setSev(+e.target.value)}/>
+            <div style={{textAlign:'center',margin:'12px 0',fontSize:32,fontWeight:900,color:sev>=7?'var(--r)':sev>=4?'var(--amb)':'var(--g800)'}}>
+              {sev}<span style={{fontSize:14,fontWeight:500,color:'var(--t3)',marginLeft:5}}>/10 · {sev<=3?'Mild':sev<=6?'Moderate':'Severe'}</span>
+            </div>
+            <VField t={t} label="Or say a number from 1 to 10" value={String(sev)}
+              onChange={v=>{const n=parseInt(voiceToDigits(v));if(n>=1&&n<=10)setSev(n);}}
+              lang={lang} audioOn={audioOn} numeric showToast={showToast}/>
+            {sev>=8&&<div style={{background:'var(--rp)',borderRadius:10,padding:10,marginBottom:10,display:'flex',gap:8,alignItems:'center'}}>
+              <span style={{fontSize:18}}>🚨</span><span style={{fontSize:12,color:'var(--r)',fontWeight:700}}>High severity — emergency triage check will run</span></div>}
+            <button type="button" className="btn btn-p btn-w btn-lg" onClick={()=>go(sev)}>{t('next')}</button>
+          </div>
+        )}
+      </div>
+      {i>0&&<button type="button" className="btn btn-gh btn-sm" onClick={()=>setI(i-1)}>{t('back')}</button>}
+    </div>
+  );
+}
+
+/* ══════ AYUSH FLOW ══════ */
+function AYUSHFlow({t,lang,audioOn,showToast,onComplete}){
+  const [i,setI]=useState(0);const [d,setD]=useState({});const [free,setFree]=useState('');
+  const speak=useSpeak(lang,audioOn);
+  const S=[
+    {k:'chief',type:'text',q:t('chief'),ph:t('chiefPlh')},
+    {k:'prakriti',type:'mcq',q:t('prakriti'),o:t('prakriti_opts')},
+    {k:'agni',type:'mcq',q:t('agni'),o:t('agni_opts')},
+    {k:'koshtha',type:'mcq',q:t('koshtha'),o:t('koshtha_opts')},
+    {k:'nidana',type:'mcq',q:t('nidana'),o:t('nidana_opts')},
+    {k:'vikriti',type:'mcq',q:t('vikriti'),o:t('vikriti_opts')},
+    {k:'sara',type:'mcq',q:t('sara'),o:t('sara_opts')},
+    {k:'sattva',type:'mcq',q:t('sattva'),o:t('sattva_opts')},
+    {k:'pastHx',type:'text',q:t('pastHx'),ph:t('pastHxPlh')},
+    {k:'meds',type:'text',q:t('meds'),ph:t('medsPlh')},
+  ];
+  const cur=S[i];
+  useEffect(()=>{setFree('');},[i]);
+  function go(v){
+    const nd={...d,[cur.k]:v};setD(nd);
+    if(i===S.length-1)onComplete(nd,false);else setI(i+1);
+  }
+  const pct=((i+1)/S.length)*100;
+  return(
+    <div style={{maxWidth:600,margin:'0 auto',padding:'18px 16px'}} className="fu">
+      <div style={{marginBottom:16}}>
+        <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+          <span style={{fontSize:12,fontWeight:700,color:'var(--t2)'}}>Dashavidha Pariksha — {i+1} / {S.length}</span>
+          <span style={{fontSize:12,fontWeight:900,color:'var(--g800)'}}>{Math.round(pct)}%</span>
+        </div>
+        <div className="pgb" style={{height:7}}><div className="pgf pgf-g" style={{width:pct+'%'}}/></div>
+      </div>
+      <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:11}}>
+        <div className="ail" style={{flex:1,background:'linear-gradient(135deg,#F0FDF4,#ECFDF5)'}}>
+          <div style={{width:29,height:29,borderRadius:9,background:'linear-gradient(135deg,#064E3B,var(--g700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,flexShrink:0}}>🌿</div>
+          <div>
+            <div style={{fontSize:11,fontWeight:800,color:'var(--g800)'}}>AYUSH Dashavidha Pariksha</div>
+            <div style={{fontSize:9,color:'var(--t3)'}}>Voice + Touch · Ayurvedic assessment</div>
+          </div>
+        </div>
+        <button type="button" className="icon-btn" onClick={()=>speak(cur.q,true)}>🔊 Read</button>
+      </div>
+      <div className="card" style={{padding:18}}>
+        {cur.type==='text'
+          ?<div>
+             <VField t={t} label={cur.q} value={free} onChange={setFree} placeholder={cur.ph}
+               lang={lang} audioOn={audioOn} multiline showToast={showToast}/>
+             <button type="button" className="btn btn-g btn-w" style={{marginTop:8}}
+               disabled={cur.k==='chief'&&!free.trim()} onClick={()=>go(free.trim()||'Not provided')}>{t('next')}</button>
+           </div>
+          :<MCQ q={cur.q} opts={cur.o} sel={d[cur.k]} lang={lang} audioOn={audioOn} t={t} showToast={showToast} onSel={go}/>}
+      </div>
+      {i>0&&<button type="button" className="btn btn-gh btn-sm" style={{marginTop:10}} onClick={()=>setI(i-1)}>{t('back')}</button>}
+    </div>
+  );
+}
+
+/* ══════ EMERGENCY ══════ */
+function EmergencyScreen({t,token,onDismiss}){
+  useEffect(()=>{
+    Speech.speak("Emergency detected. Please proceed to the Emergency Department immediately. The nurse station has been alerted.",'en');
+    return()=>Speech.stop();
+  },[]);
+  return(
+    <div className="emsc">
+      <div className="em-ic">🚨</div>
+      <h1 style={{fontSize:36,fontWeight:900,color:'#fff',marginBottom:8,textAlign:'center'}}>{t('emergency')}</h1>
+      <p style={{fontSize:16,color:'rgba(255,255,255,.85)',textAlign:'center',maxWidth:420,marginBottom:22,lineHeight:1.6}}>{t('emergencySub')}</p>
+      <div className="em-tok">
+        <div style={{fontSize:11,color:'rgba(255,255,255,.65)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>Priority Emergency Token</div>
+        <div style={{fontSize:58,fontWeight:900,color:'#fff',letterSpacing:6}}>{token}</div>
+        <div style={{background:'rgba(255,255,255,.2)',color:'#fff',padding:'5px 15px',borderRadius:20,fontSize:13,fontWeight:700,marginTop:7,display:'inline-block'}}>🔴 EMERGENCY QUEUE</div>
+      </div>
+      <button type="button" className="btn" style={{background:'rgba(255,255,255,.15)',color:'#fff',border:'2px solid rgba(255,255,255,.4)',fontSize:15}} onClick={onDismiss}>{t('alertNurse')}</button>
+    </div>
+  );
+}
+
+/* ══════ AI SUMMARY GENERATOR (from real intake) ══════ */
+function buildSummary(p){
+  const d=p.intake||{};const g=p.gender==='Female'?'F':p.gender==='Male'?'M':'';
+  const parts=[];
+  parts.push(`${p.age}${g} presenting with ${d.chief||p.chief}.`);
+  if(p.mode==='allopathy'){
+    const site=d.site?.part?`${d.site.part}${d.site.text?` (${d.site.text})`:''}`:d.site?.text||'unspecified site';
+    const bits=[];
+    if(d.onset)bits.push(`onset ${d.onset.toLowerCase()}`);
+    if(d.character)bits.push(`character ${d.character.toLowerCase()}`);
+    if(d.radiation&&!/stays/i.test(d.radiation))bits.push(d.radiation.toLowerCase());
+    if(d.time)bits.push(d.time.toLowerCase());
+    if(d.exacerbating)bits.push(`aggravated by ${d.exacerbating.toLowerCase()}`);
+    parts.push(`Pain localised to ${site}${bits.length?', '+bits.join(', '):''}.`);
+    if(d.severity)parts.push(`Severity rated ${d.severity}/10 (${d.severity<=3?'mild':d.severity<=6?'moderate':'severe'}).`);
+    if(d.associations?.length)parts.push(`Associated symptoms: ${d.associations.join(', ')}.`);
+  }else{
+    const ay=[];
+    if(d.prakriti)ay.push(`Prakriti ${d.prakriti}`);
+    if(d.vikriti)ay.push(`Vikriti ${d.vikriti}`);
+    if(d.agni)ay.push(`Agni ${d.agni}`);
+    if(d.koshtha)ay.push(`Koshtha ${d.koshtha}`);
+    if(d.sara)ay.push(`Sara ${d.sara}`);
+    if(d.sattva)ay.push(`Sattva ${d.sattva}`);
+    if(ay.length)parts.push(`Dashavidha Pariksha — ${ay.join('; ')}.`);
+    if(d.nidana)parts.push(`Nidana identified as ${d.nidana.toLowerCase()}.`);
+  }
+  if(d.pastHx&&d.pastHx!=='Not provided')parts.push(`Past history: ${d.pastHx}.`);
+  if(d.meds&&d.meds!=='Not provided')parts.push(`Current medications: ${d.meds}.`);
+  if(p.ocr?.drugs?.length)parts.push(`Documents show: ${p.ocr.drugs.join(', ')}.`);
+  const abn=(p.ocr?.labs||[]).filter(l=>l.flag);
+  if(abn.length)parts.push(`Abnormal labs: ${abn.map(l=>`${l.n} ${l.v}`).join(', ')}.`);
+  if(p.ocr?.interactions?.length)parts.push(`⚠ ${p.ocr.interactions.join('; ')}.`);
+  if(p.triage==='red')parts.push('RED FLAG — urgent clinical review required.');
+  return parts.join(' ');
+}
+
+/* ══════ PATIENT SUMMARY + SUBMIT TO DOCTOR ══════ */
+function PatientSummary({draft,t,lang,audioOn,onSubmit,submitted}){
+  const speak=useSpeak(lang,audioOn);
+  const sum=useMemo(()=>buildSummary(draft),[draft]);
+  const tri=draft.triage;
+  const label=tri==='red'?'🔴 EMERGENCY':tri==='amber'?'🟡 PRIORITY':'🟢 ROUTINE';
+  useEffect(()=>{speak(`Your summary is ready. Token ${draft.token}. Please proceed to the ${tri==='red'?'emergency':tri==='amber'?'priority':'routine'} queue.`);},[]);
+  const d=draft.intake||{};
+  return(
+    <div style={{maxWidth:580,margin:'0 auto',padding:'22px 16px'}} className="fu">
+      <div style={{textAlign:'center',marginBottom:20}}>
+        <div style={{fontSize:48}}>✅</div>
+        <h2 style={{fontSize:20,fontWeight:900,color:'var(--n900)',marginTop:6}}>{t('summaryTitle')}</h2>
+      </div>
+      <div style={{background:'linear-gradient(135deg,var(--n900),var(--n800))',borderRadius:18,padding:22,textAlign:'center',marginBottom:14,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-28,right:-28,width:108,height:108,borderRadius:'50%',background:'rgba(255,255,255,.05)'}}/>
+        <div style={{fontSize:11,color:'rgba(255,255,255,.55)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{t('tokenReady')}</div>
+        <div style={{fontSize:54,fontWeight:900,color:'#fff',letterSpacing:6}}>{draft.token}</div>
+        <div style={{background:tri==='red'?'rgba(220,38,38,.35)':tri==='amber'?'rgba(245,158,11,.35)':'rgba(21,128,61,.35)',color:'#fff',border:'1px solid rgba(255,255,255,.25)',padding:'5px 17px',borderRadius:20,fontSize:13,fontWeight:800,marginTop:7,display:'inline-block'}}>{label} QUEUE</div>
+      </div>
+
+      <div className="card" style={{marginBottom:12}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <div style={{fontWeight:800,color:'var(--n900)',fontSize:13}}>🧠 AI-Generated Summary</div>
+          <button type="button" className="icon-btn" onClick={()=>speak(sum,true)}>🔊 Listen</button>
+        </div>
+        <div style={{fontSize:12,lineHeight:1.75,color:'var(--t2)',background:'var(--sl)',borderRadius:9,padding:12}}>{sum}</div>
+      </div>
+
+      <div className="card" style={{marginBottom:12}}>
+        <div style={{fontWeight:800,color:'var(--n900)',marginBottom:10,fontSize:13}}>📋 Structured History</div>
+        {d.chief&&<div className="soap"><div className="soapk">Chief Complaint</div><span style={{fontSize:12}}>{d.chief}</span></div>}
+        {draft.mode==='allopathy'?<>
+          {d.site&&<div className="soap"><div className="soapk">Site</div><span style={{fontSize:12}}>{d.site.part}{d.site.text?` · ${d.site.text}`:''}</span></div>}
+          {d.onset&&<div className="soap"><div className="soapk">Onset</div><span style={{fontSize:12}}>{d.onset}</span></div>}
+          {d.character&&<div className="soap"><div className="soapk">Character</div><span style={{fontSize:12}}>{d.character}</span></div>}
+          {d.radiation&&<div className="soap"><div className="soapk">Radiation</div><span style={{fontSize:12}}>{d.radiation}</span></div>}
+          {d.associations?.length>0&&<div className="soap"><div className="soapk">Associated</div><div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:3}}>{d.associations.map((a,i)=><span key={i} className="bdg bdg-a">{a}</span>)}</div></div>}
+          {d.time&&<div className="soap"><div className="soapk">Timing</div><span style={{fontSize:12}}>{d.time}</span></div>}
+          {d.exacerbating&&<div className="soap"><div className="soapk">Exacerbating</div><span style={{fontSize:12}}>{d.exacerbating}</span></div>}
+          {d.severity&&<div className="soap"><div className="soapk">Severity</div><span style={{fontSize:19,fontWeight:900,color:d.severity>=7?'var(--r)':d.severity>=4?'var(--amb)':'var(--g800)'}}>{d.severity}/10</span></div>}
+        </>:<>
+          {['prakriti','vikriti','agni','koshtha','nidana','sara','sattva'].map(k=>d[k]&&(
+            <div key={k} className="soap"><div className="soapk">{k}</div><span style={{fontSize:12}}>{d[k]}</span></div>
+          ))}
+        </>}
+        {d.pastHx&&d.pastHx!=='Not provided'&&<div className="soap"><div className="soapk">Past History</div><span style={{fontSize:12}}>{d.pastHx}</span></div>}
+        {d.meds&&d.meds!=='Not provided'&&<div className="soap"><div className="soapk">Current Medications</div><span style={{fontSize:12}}>{d.meds}</span></div>}
+      </div>
+
+      {draft.ocr?.drugs?.length>0&&(
+        <div className="card" style={{marginBottom:12}}>
+          <div style={{fontWeight:800,color:'var(--n900)',marginBottom:8,fontSize:13}}>💊 From Uploaded Documents</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:4}}>{draft.ocr.drugs.map((x,i)=><span key={i} className="bdg bdg-b">{x}</span>)}</div>
+          {draft.ocr.labs?.filter(l=>l.flag).map((l,i)=><div key={i} style={{marginTop:6,fontSize:11,color:'var(--r)',fontWeight:600}}>⚠ {l.n}: {l.v} (ref {l.ref})</div>)}
+        </div>
+      )}
+
+      {!submitted?(
+        <button type="button" className="btn btn-g btn-w btn-lg" onClick={onSubmit}>{t('submitBtn')}</button>
+      ):(
+        <div style={{background:'linear-gradient(135deg,#F0FDF4,#ECFDF5)',border:'1px solid rgba(21,128,61,.25)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:28,marginBottom:6}}>📤</div>
+          <div style={{fontWeight:800,color:'var(--g800)',fontSize:14,marginBottom:4}}>{t('submitted')}</div>
+          <div style={{fontSize:11,color:'var(--t2)',lineHeight:1.6}}>Your history is now live on the doctor's screen. Switch to <b>Doctor</b> mode in the header to see it appear in the queue.</div>
+        </div>
+      )}
+      <div style={{background:'var(--sl)',borderRadius:12,padding:11,fontSize:10,color:'var(--t3)',lineHeight:1.7,textAlign:'center',marginTop:12}}>
+        🔒 Encrypted · pushed to HIS via FHIR R4 · linked to ABHA · session auto-wipes in 30 min
+      </div>
+    </div>
+  );
+}
+
+/* ══════ PATIENT MODE ══════ */
+function PatientMode({lang,audioOn,showToast,addToQueue,easy,onEasyChange,onToggleAudio}){
+  const t=useT(lang);
+  const [screen,setScreen]=useState('landing');
+  const [pt,setPt]=useState(null);
+  const [mode,setMode]=useState('allopathy');
+  const [intake,setIntake]=useState(null);
+  const [ocr,setOcr]=useState(null);
+  const [emerg,setEmerg]=useState(false);
+  const [draft,setDraft]=useState(null);
+  const [submitted,setSubmitted]=useState(false);
+
+  function login(p){setPt(p);setScreen(p.consentDone?'mode':'consent');}
+
+  function finishIntake(data,isEmergency){
+    setIntake(data);
+    if(isEmergency){setEmerg(true);makeDraft(data,null,'red');}
+    else setScreen('ocr');
+  }
+  function makeDraft(data,ocrData,forceTriage){
+    const sev=data.severity||0;
+    const triage=forceTriage||(sev>=8?'red':sev>=5?'amber':'green');
+    const token=`T-${String(Math.floor(Math.random()*800)+200)}`;
+    const d={
+      id:'MK-'+Date.now().toString().slice(-4),
+      name:pt?.name||'Patient',age:pt?.age||30,gender:pt?.gender||'Other',
+      abha:pt?.abha||'—',mode,chief:data.chief||'Not specified',
+      triage,token,arrivedAt:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+      fresh:true,hospital:pt?.hospital?.name,
+      vitals:{bp:'—',hr:'—',spo2:'—',temp:'—'},
+      intake:data,ocr:ocrData||{drugs:[],labs:[],interactions:[]},
+    };
+    d.summary=buildSummary(d);
+    setDraft(d);return d;
+  }
+  function goSummary(){const d=makeDraft(intake,ocr);setScreen('summary');return d;}
+  function submitToDoctor(){
+    const d=draft||makeDraft(intake,ocr);
+    addToQueue(d);setSubmitted(true);
+    showToast('✓ History submitted — now visible in Doctor mode','success');
+    Speech.speak('Your history has been submitted to the doctor.',lang);
+  }
+
+  if(emerg)return<EmergencyScreen t={t} token={draft?.token||'T-E01'} onDismiss={()=>{setEmerg(false);setScreen('summary');}}/>;
+  if(screen==='landing')return<PatientLogin lang={lang} t={t} audioOn={audioOn} showToast={showToast} onLogin={login} easy={easy} onEasyChange={onEasyChange} onToggleAudio={onToggleAudio}/>;
+
+  const stepLbl={consent:'1/4 · Consent',mode:'2/4 · Mode',q:'3/4 · History',ocr:'4/4 · Documents',summary:'✓ Complete'}[screen]||'';
+
+  return(
+    <div className={easy?'senior-ui':''} style={{background:'var(--sl)',minHeight:'calc(100vh - 62px)'}}>
+      {pt&&(
+        <div style={{background:'linear-gradient(135deg,var(--n900),var(--n800))',padding:'8px 18px',display:'flex',alignItems:'center',gap:11,flexWrap:'wrap'}}>
+          <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,.15)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>{(pt.name||'P')[0]}</div>
+          <div>
+            <div style={{color:'#fff',fontWeight:800,fontSize:13}}>{pt.name}</div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,.5)'}}>{pt.displayId||pt.abha}</div>
+          </div>
+          {pt.familyAssisted&&<span style={{background:'rgba(74,222,128,.16)',color:'#B8FFD0',padding:'3px 8px',borderRadius:10,fontSize:10,fontWeight:700}}>👨‍👩‍👧 {lang==='hi'?'परिवार सहायता':'Family assisted'}</span>}
+          {pt.hospital&&<span style={{background:'rgba(255,255,255,.12)',color:'rgba(255,255,255,.85)',padding:'3px 9px',borderRadius:10,fontSize:10,fontWeight:600}}>📍 {pt.hospital.name}</span>}
+          <span className="abha-chip" style={{marginLeft:'auto'}}>ABHA ✓</span>
+          <span style={{color:'rgba(255,255,255,.45)',fontSize:11}}>{stepLbl}</span>
+        </div>
+      )}
+      {screen==='consent'&&(
+        <div style={{maxWidth:490,margin:'0 auto',padding:'26px 16px'}} className="fu">
+          <div style={{textAlign:'center',marginBottom:16}}><div style={{fontSize:42}}>🔒</div>
+            <h2 style={{fontSize:18,fontWeight:900,color:'var(--n900)',marginTop:6}}>Consent & Privacy</h2></div>
+          <ConsentGate t={t} lang={lang} audioOn={audioOn} onAccept={()=>setScreen('mode')}/>
+        </div>
+      )}
+      {screen==='mode'&&<IntakeMode t={t} lang={lang} audioOn={audioOn} onSelect={m=>{setMode(m);setScreen('q');}}/>}
+      {screen==='q'&&(mode==='allopathy'
+        ?<SOCRATESFlow t={t} lang={lang} audioOn={audioOn} showToast={showToast} onComplete={finishIntake}/>
+        :<AYUSHFlow t={t} lang={lang} audioOn={audioOn} showToast={showToast} onComplete={finishIntake}/>)}
+      {screen==='ocr'&&(
+        <div style={{maxWidth:560,margin:'0 auto',padding:'26px 16px'}} className="fu">
+          <h2 style={{fontSize:18,fontWeight:900,color:'var(--n900)',marginBottom:3}}>{t('ocrTitle')}</h2>
+          <p style={{color:'var(--t2)',fontSize:12,marginBottom:16}}>{t('ocrSub')}</p>
+          <div className="card" style={{padding:18,marginBottom:11}}>
+            <OCRModule lang={lang} t={t} showToast={showToast} onExtracted={setOcr}/>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button type="button" className="btn btn-gh" onClick={()=>setScreen('q')}>{t('back')}</button>
+            <button type="button" className="btn btn-p" style={{flex:1}} onClick={goSummary}>{ocr?'Continue →':t('skip')}</button>
+          </div>
+        </div>
+      )}
+      {screen==='summary'&&draft&&(
+        <PatientSummary draft={draft} t={t} lang={lang} audioOn={audioOn} submitted={submitted} onSubmit={submitToDoctor}/>
+      )}
+    </div>
+  );
+}
+
+/* ══════ DOCTOR MODE — reads live queue ══════ */
+function DoctorMode({lang,showToast,queue,markSeen,audioOn}){
+  const t=useT(lang);
+  const [selId,setSelId]=useState(queue[0]?.id);
+  const [tab,setTab]=useState('summary');
+  const [edits,setEdits]=useState({});
+  const [notes,setNotes]=useState({});
+  const [synced,setSynced]=useState({});
+  const [thinking,setThinking]=useState(false);
+  const speak=useSpeak(lang,audioOn);
+
+  // Auto-select newest patient when queue grows
+  const prevLen=useRef(queue.length);
+  useEffect(()=>{
+    if(queue.length>prevLen.current){
+      const newest=queue[0];
+      setSelId(newest.id);setTab('summary');
+      setThinking(true);setTimeout(()=>setThinking(false),1500);
+      showToast(`🔔 New patient: ${newest.name} (${newest.token})`,'success');
+    }
+    prevLen.current=queue.length;
+    if(!queue.find(p=>p.id===selId)&&queue[0])setSelId(queue[0].id);
+  },[queue.length]);
+
+  const sel=queue.find(p=>p.id===selId)||queue[0];
+  if(!sel)return<div style={{padding:40,textAlign:'center',color:'var(--t3)'}}>No patients in queue yet.</div>;
+
+  const summaryVal=edits[sel.id]!==undefined?edits[sel.id]:sel.summary;
+  const noteVal=notes[sel.id]||'';
+
+  function pick(p){
+    setSelId(p.id);markSeen(p.id);setTab('summary');
+    setThinking(true);setTimeout(()=>setThinking(false),1200);
+  }
+
+  const fhir={resourceType:"Bundle",type:"transaction",id:`bundle-${sel.id}`,
+    meta:{lastUpdated:new Date().toISOString(),profile:["https://nrces.in/ndhm/fhir/r4/StructureDefinition/DocumentBundle"]},
+    entry:[
+      {fullUrl:`Patient/${sel.id}`,resource:{resourceType:"Patient",id:sel.id,
+        identifier:[{system:"https://healthid.ndhm.gov.in",value:sel.abha}],
+        name:[{text:sel.name}],gender:String(sel.gender||'').toLowerCase(),
+        extension:[{url:"age",valueInteger:sel.age}]}},
+      {fullUrl:`Encounter/${sel.id}`,resource:{resourceType:"Encounter",id:`enc-${sel.id}`,
+        status:"in-progress",class:{code:"AMB",display:"ambulatory"},
+        subject:{reference:`Patient/${sel.id}`},
+        priority:{text:sel.triage==='red'?'emergency':sel.triage==='amber'?'urgent':'routine'}}},
+      {fullUrl:`Condition/${sel.id}`,resource:{resourceType:"Condition",id:`cond-${sel.id}`,
+        clinicalStatus:{coding:[{code:"active"}]},
+        subject:{reference:`Patient/${sel.id}`},code:{text:sel.chief},
+        severity:{text:sel.intake?.severity?`${sel.intake.severity}/10`:'unspecified'},
+        onsetString:sel.intake?.onset||'',recordedDate:new Date().toISOString()}},
+      ...(sel.ocr?.labs||[]).map((l,i)=>({fullUrl:`Observation/obs-${i}`,resource:{resourceType:"Observation",id:`obs-${i}`,
+        status:"final",category:[{coding:[{code:"laboratory"}]}],
+        subject:{reference:`Patient/${sel.id}`},code:{text:l.n},valueString:l.v,
+        referenceRange:[{text:l.ref}],interpretation:l.flag?[{coding:[{code:"A",display:"Abnormal"}]}]:[]}})),
+      ...(sel.ocr?.drugs||[]).map((d,i)=>({fullUrl:`MedicationStatement/med-${i}`,resource:{resourceType:"MedicationStatement",id:`med-${i}`,
+        status:"active",subject:{reference:`Patient/${sel.id}`},medicationCodeableConcept:{text:d}}})),
+      {fullUrl:`Composition/${sel.id}`,resource:{resourceType:"Composition",id:`comp-${sel.id}`,
+        status:"preliminary",type:{text:"Clinical History Summary"},
+        subject:{reference:`Patient/${sel.id}`},date:new Date().toISOString(),
+        title:"MediNode AI Intake Summary",
+        section:[{title:"Summary",text:{status:"generated",div:summaryVal}}]}},
+    ]};
+
+  const badge=p=>p.triage==='red'?<span className="bdg bdg-r">🔴 Emergency</span>
+    :p.triage==='amber'?<span className="bdg bdg-a">🟡 Priority</span>
+    :<span className="bdg bdg-g">🟢 Routine</span>;
+
+  const soap=[
+    ['S — Subjective',(()=>{
+      const d=sel.intake||{};
+      if(sel.mode==='allopathy'){
+        const b=[d.chief];
+        if(d.site)b.push(`Site: ${d.site.part||''}${d.site.text?` (${d.site.text})`:''}`);
+        if(d.onset)b.push(`Onset: ${d.onset}`);
+        if(d.character)b.push(`Character: ${d.character}`);
+        if(d.radiation)b.push(`Radiation: ${d.radiation}`);
+        if(d.associations?.length)b.push(`Associated: ${d.associations.join(', ')}`);
+        if(d.severity)b.push(`Severity ${d.severity}/10`);
+        return b.filter(Boolean).join('. ')+'.';
+      }
+      return `${d.chief||sel.chief}. Prakriti: ${d.prakriti||'—'}. Vikriti: ${d.vikriti||'—'}. Agni: ${d.agni||'—'}. Koshtha: ${d.koshtha||'—'}. Nidana: ${d.nidana||'—'}.`;
+    })()],
+    ['O — Objective',`BP ${sel.vitals?.bp} · HR ${sel.vitals?.hr} · SpO₂ ${sel.vitals?.spo2} · Temp ${sel.vitals?.temp}`
+      +((sel.ocr?.labs||[]).length?` | Labs: ${sel.ocr.labs.map(l=>`${l.n} ${l.v}${l.flag?' ⚠':''}`).join(', ')}`:'')],
+    ['A — Assessment',sel.triage==='red'
+      ?'⚠️ RED FLAG — features suggestive of acute coronary syndrome or other time-critical pathology. Urgent ECG, troponin and senior review required.'
+      :sel.triage==='amber'
+      ?'Moderate-priority presentation. Differential to be narrowed with targeted investigations. Not immediately life-threatening on current data.'
+      :'Low-acuity presentation. Symptoms consistent with a self-limiting or chronic stable process. No red flags identified on structured intake.'],
+    ['P — Plan',sel.triage==='red'
+      ?'12-lead ECG stat · Troponin I (0h, 3h) · CBC, BMP, CXR · Continuous monitoring · Cardiology consult · Aspirin loading if ACS confirmed.'
+      :sel.triage==='amber'
+      ?'Targeted bloods (CBC, ESR, CRP) · Relevant imaging · Symptomatic management · Review in 48–72 hours or sooner if worsening.'
+      :'Reassurance and patient education · Symptomatic treatment · Lifestyle and trigger diary · Routine follow-up in 4 weeks.'],
+  ];
+
+  const freshCount=queue.filter(p=>p.fresh).length;
+
+  return(
+    <div style={{display:'flex',height:'calc(100vh - 62px)',overflow:'hidden'}}>
+      <div className="qsb">
+        <div className="qhdr">
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{color:'#fff',fontWeight:900,fontSize:13}}>{t('patQueue')}</div>
+            {freshCount>0&&<span className="bdg bdg-new">{freshCount} new</span>}
+          </div>
+          <div style={{color:'rgba(255,255,255,.4)',fontSize:10,marginTop:3}}>{queue.length} waiting · {new Date().toLocaleTimeString()}</div>
+        </div>
+        {queue.map(p=>(
+          <div key={p.id} className={`qpt trp tr-${p.triage} ${selId===p.id?'on':''} ${p.fresh?'fresh':''}`} onClick={()=>pick(p)}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:4}}>
+              <div style={{color:'#fff',fontWeight:800,fontSize:12,display:'flex',alignItems:'center',gap:5}}>
+                {p.name}{p.fresh&&<span className="bdg bdg-new" style={{fontSize:8,padding:'1px 5px'}}>NEW</span>}
+              </div>
+              <div style={{color:'rgba(255,255,255,.6)',fontFamily:'JetBrains Mono,monospace',fontSize:9,fontWeight:700,background:'rgba(255,255,255,.1)',padding:'2px 6px',borderRadius:4}}>{p.token}</div>
+            </div>
+            <div style={{color:'rgba(255,255,255,.45)',fontSize:10,marginBottom:4}}>{p.age}y · {p.gender} · {String(p.mode).toUpperCase()} · {p.arrivedAt}</div>
+            <div style={{color:'rgba(255,255,255,.75)',fontSize:11,marginBottom:6,lineHeight:1.4}}>{p.chief}</div>
+            {badge(p)}
+          </div>
+        ))}
+      </div>
+
+      <div style={{flex:1,overflowY:'auto',padding:18,background:'var(--sl)'}}>
+        <div className="fu" key={sel.id}>
+          <div className="card" style={{marginBottom:14,padding:18}}>
+            <div style={{display:'flex',gap:12,alignItems:'flex-start',flexWrap:'wrap',justifyContent:'space-between'}}>
+              <div style={{display:'flex',gap:12,alignItems:'center'}}>
+                <div style={{width:44,height:44,borderRadius:12,background:'linear-gradient(135deg,var(--n800),var(--n600))',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:19,fontWeight:900,flexShrink:0}}>{sel.name[0]}</div>
+                <div>
+                  <h2 style={{fontSize:17,fontWeight:900}}>{sel.name}</h2>
+                  <div style={{fontSize:11,color:'var(--t2)',marginTop:2,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                    <span>{sel.age}y · {sel.gender}</span><span className="abha-d">{sel.abha}</span>
+                  </div>
+                  <div style={{display:'flex',gap:5,marginTop:6,flexWrap:'wrap'}}>
+                    {badge(sel)}<span className="bdg bdg-b">{sel.token}</span>
+                    <span className={`bdg ${sel.mode==='ayush'?'bdg-p':'bdg-t'}`}>{String(sel.mode).toUpperCase()}</span>
+                    <span className="bdg bdg-g">⏱ {sel.arrivedAt}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="vtg">
+                {[['BP',sel.vitals?.bp],['HR',sel.vitals?.hr],['SpO₂',sel.vitals?.spo2],['Temp',sel.vitals?.temp]].map(([k,v])=>(
+                  <div key={k} className="vtc"><div className="vtv">{v}</div><div className="vtl">{k}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{display:'flex',gap:3,marginBottom:13,background:'#fff',borderRadius:12,padding:3,boxShadow:'0 2px 8px rgba(11,29,58,.06)',border:'1px solid var(--sl2)'}}>
+            {[['summary','🧠 '+t('aiSum')],['hx','📋 History'],['docs','📄 Documents'],['rx','💊 '+t('rx')],['fhir','🔗 '+t('fhir')]].map(([id,lb])=>(
+              <button key={id} type="button" onClick={()=>setTab(id)}
+                style={{flex:1,padding:'9px 4px',borderRadius:9,border:'none',cursor:'pointer',fontSize:11,fontWeight:700,
+                  background:tab===id?'linear-gradient(135deg,var(--n800),var(--n700))':'transparent',
+                  color:tab===id?'#fff':'var(--t2)',transition:'all .25s'}}>{lb}</button>
+            ))}
+          </div>
+
+          {tab==='summary'&&(
+            <div className="fu">
+              {thinking&&<div className="ail" style={{marginBottom:12}}><div className="aid"><span/><span/><span/></div>
+                <span style={{fontSize:12}}>AI synthesising summary from structured intake, OCR and vitals…</span></div>}
+              {!thinking&&<>
+                <div className="card" style={{marginBottom:12}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,gap:8,flexWrap:'wrap'}}>
+                    <div style={{fontWeight:800,fontSize:13,color:'var(--n900)'}}>{t('aiSum')}</div>
+                    <div style={{display:'flex',gap:5,alignItems:'center'}}>
+                      <span className="bdg bdg-b">AI · Doctor-editable</span>
+                      <button type="button" className="icon-btn" onClick={()=>speak(summaryVal,true)}>🔊 Listen</button>
+                    </div>
+                  </div>
+                  <textarea value={summaryVal} onChange={e=>setEdits(p=>({...p,[sel.id]:e.target.value}))}
+                    style={{width:'100%',border:'2px solid var(--sl2)',borderRadius:10,padding:12,fontSize:12,lineHeight:1.75,fontFamily:'inherit',resize:'vertical',minHeight:120,outline:'none',color:'var(--t1)'}}/>
+                  <div style={{fontSize:10,color:'var(--t3)',marginTop:6}}>⏱ Read time ≈ {Math.max(1,Math.round(summaryVal.split(' ').length/200))} min · Generated from patient's own voice/touch intake</div>
+                </div>
+                <div className="card" style={{marginBottom:12}}>
+                  <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:11}}>📋 SOAP Notes</div>
+                  {soap.map(([k,v])=><div key={k} className="soap"><div className="soapk">{k}</div><span style={{fontSize:12,lineHeight:1.6}}>{v}</span></div>)}
+                </div>
+                {sel.ocr?.interactions?.length>0&&(
+                  <div style={{background:'var(--rp)',borderRadius:12,padding:14,border:'1px solid rgba(220,38,38,.2)'}}>
+                    <div style={{fontWeight:800,color:'var(--r)',marginBottom:6,fontSize:12}}>⚠️ Drug Interaction Alerts</div>
+                    {sel.ocr.interactions.map((x,i)=><div key={i} style={{fontSize:12,color:'var(--r)',marginBottom:2}}>• {x}</div>)}
+                  </div>
+                )}
+              </>}
+            </div>
+          )}
+
+          {tab==='hx'&&(
+            <div className="card fu">
+              <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:12}}>📋 Full Structured Intake (patient's own words)</div>
+              {Object.entries(sel.intake||{}).map(([k,v])=>{
+                if(!v)return null;
+                let disp=v;
+                if(Array.isArray(v))disp=v.join(', ');
+                else if(typeof v==='object')disp=`${v.part||''}${v.text?` · ${v.text}`:''}`;
+                return<div key={k} className="soap"><div className="soapk">{k.replace(/([A-Z])/g,' $1')}</div><span style={{fontSize:12}}>{String(disp)}</span></div>;
+              })}
+            </div>
+          )}
+
+          {tab==='docs'&&(
+            <div className="card fu">
+              <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:12}}>📄 Digitised Documents</div>
+              <div className="tlin">
+                <div className="tldt" style={{background:'linear-gradient(135deg,var(--n800),var(--n600))',color:'#fff'}}>💊</div>
+                <div style={{flex:1,paddingTop:2}}>
+                  <div style={{fontWeight:700,fontSize:12,marginBottom:6,color:'var(--n900)'}}>Active Medications</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                    {(sel.ocr?.drugs||[]).length?sel.ocr.drugs.map((d,i)=><span key={i} className="bdg bdg-b">{d}</span>)
+                      :<span style={{color:'var(--t3)',fontSize:12}}>No documents uploaded</span>}
+                  </div>
+                  {sel.intake?.meds&&sel.intake.meds!=='Not provided'&&
+                    <div style={{marginTop:8,fontSize:11,color:'var(--t2)'}}><b>Patient-reported:</b> {sel.intake.meds}</div>}
+                </div>
+              </div>
+              <div className="tlin">
+                <div className="tldt" style={{background:'linear-gradient(135deg,#7C3AED,#A78BFA)',color:'#fff'}}>🔬</div>
+                <div style={{flex:1,paddingTop:2}}>
+                  <div style={{fontWeight:700,fontSize:12,marginBottom:6,color:'var(--n900)'}}>Laboratory Values</div>
+                  {(sel.ocr?.labs||[]).length?sel.ocr.labs.map((l,i)=>(
+                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid var(--sl2)'}}>
+                      <span style={{fontSize:12}}>{l.n}: <b>{l.v}</b></span>
+                      <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                        <span style={{fontSize:10,color:'var(--t3)'}}>Ref {l.ref}</span>
+                        {l.flag&&<span className="bdg bdg-r">⚠ Abnormal</span>}
+                      </div>
+                    </div>
+                  )):<span style={{color:'var(--t3)',fontSize:12}}>No lab values extracted</span>}
+                </div>
+              </div>
+              <div className="tlin">
+                <div className="tldt" style={{background:'linear-gradient(135deg,var(--g800),var(--g600))',color:'#fff'}}>📜</div>
+                <div style={{flex:1,paddingTop:2}}>
+                  <div style={{fontWeight:700,fontSize:12,marginBottom:6,color:'var(--n900)'}}>Past History</div>
+                  <span style={{fontSize:12,color:'var(--t2)'}}>{sel.intake?.pastHx&&sel.intake.pastHx!=='Not provided'?sel.intake.pastHx:'None reported'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab==='rx'&&(
+            <div className="fu">
+              <div className="card" style={{marginBottom:12}}>
+                <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:11}}>Clinical Actions</div>
+                <div style={{display:'flex',flexDirection:'column',gap:9}}>
+                  <button type="button" className={`btn btn-lg ${synced[sel.id]?'btn-gh':'btn-g'}`} style={{justifyContent:'flex-start',gap:10}}
+                    onClick={()=>{setSynced(p=>({...p,[sel.id]:true}));showToast(t('syncDone'),'success');}}>
+                    {synced[sel.id]?'✓ Synced to EHR — ABHA linked':'🔄 '+t('syncEhr')}
+                  </button>
+                  <button type="button" className="btn btn-o btn-lg" style={{justifyContent:'flex-start',gap:10}}
+                    onClick={()=>showToast(t('labsDone'),'success')}>🔬 {t('orderLabs')}</button>
+                </div>
+              </div>
+              <div className="card">
+                <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:10}}>{t('addNotes')}</div>
+                <textarea value={noteVal} onChange={e=>setNotes(p=>({...p,[sel.id]:e.target.value}))}
+                  placeholder="Differential diagnosis, prescriptions, referrals, follow-up plan…"
+                  style={{width:'100%',border:'2px solid var(--sl2)',borderRadius:10,padding:12,fontSize:12,fontFamily:'inherit',resize:'vertical',minHeight:90,outline:'none',marginBottom:10,color:'var(--t1)'}}/>
+                <button type="button" className="btn btn-p" onClick={()=>showToast(t('notesDone'),'success')}>Save Notes</button>
+              </div>
+            </div>
+          )}
+
+          {tab==='fhir'&&(
+            <div className="card fu">
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:11,flexWrap:'wrap',gap:8}}>
+                <div style={{fontWeight:800,fontSize:13,color:'var(--n900)'}}>FHIR R4 Bundle — ABDM Ready</div>
+                <div style={{display:'flex',gap:5}}>
+                  <span className="bdg bdg-g">✓ R4</span><span className="bdg bdg-b">NRCES Profile</span>
+                  <span className="bdg bdg-t">{fhir.entry.length} resources</span>
+                </div>
+              </div>
+              <div className="fhirb">{JSON.stringify(fhir,null,2)}</div>
+              <button type="button" className="btn btn-o btn-sm" style={{marginTop:10}}
+                onClick={()=>{const b=new Blob([JSON.stringify(fhir,null,2)],{type:'application/json'});
+                  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`FHIR_${sel.id}.json`;a.click();
+                  showToast('FHIR bundle downloaded','success');}}>⬇ Download FHIR JSON</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════ ADMIN MODE ══════ */
+function AdminMode({lang,queue}){
+  const t=useT(lang);
+  const [tab,setTab]=useState('metrics');
+  const red=queue.filter(p=>p.triage==='red').length;
+  const metrics=[
+    {ic:'⏱',v:'2m 41s',l:t('avgTime'),s:'Target <3 min',c:'8% faster',up:true},
+    {ic:'👥',v:String(3845+queue.length),l:t('vol'),s:'vs 3,512 yesterday',c:'9.5%',up:true},
+    {ic:'🎤',v:'68%',l:t('voiceUse'),s:'vs 32% touch only',c:'12% voice growth',up:true},
+    {ic:'🚨',v:String(11+red),l:'Red Flag Alerts',s:'Emergency triage today',c:'4 admitted',up:false},
+  ];
+  const kiosks=[{id:'K-01',loc:'OPD Block A',s:'on',n:142},{id:'K-02',loc:'OPD Block B',s:'on',n:98},
+    {id:'K-03',loc:'AYUSH OPD',s:'on',n:67},{id:'K-04',loc:'Emergency Lobby',s:'warn',n:31},{id:'K-05',loc:'Paediatrics',s:'off',n:0}];
+  const langs=[{l:'Hindi',p:42,c:'var(--n700)'},{l:'English',p:31,c:'var(--g800)'},{l:'Bengali',p:12,c:'#7C3AED'},{l:'Tamil',p:8,c:'var(--amb)'},{l:'Others',p:7,c:'var(--sl4)'}];
+  const logs=[
+    ...queue.filter(p=>p.fresh).map(p=>({t:p.arrivedAt,e:`New intake ${p.id} — ${p.name} (${p.triage.toUpperCase()} triage)`,ty:p.triage==='red'?'alert':'success'})),
+    {t:'14:32:11',e:'MK-001 — Emergency triage triggered by SOCRATES engine',ty:'alert'},
+    {t:'14:28:44',e:'OCR scan complete on K-02 in 4.2s (Tesseract eng)',ty:'info'},
+    {t:'14:25:19',e:'FHIR R4 Bundle pushed to ABDM sandbox — MK-002',ty:'success'},
+    {t:'14:20:05',e:'Session auto-wiped MK-003 after 30-min TTL',ty:'info'},
+    {t:'14:15:33',e:'Drug interaction flagged — Aspirin + Warfarin',ty:'alert'},
+    {t:'14:10:22',e:'ASR benchmark: WER 9.8% en-IN, 11.2% hi-IN',ty:'info'},
+    {t:'14:05:44',e:'Kiosk K-05 offline — maintenance mode',ty:'error'},
+  ];
+  return(
+    <div style={{padding:18,maxWidth:1060,margin:'0 auto'}}>
+      <div style={{display:'flex',gap:3,marginBottom:18,background:'#fff',borderRadius:12,padding:3,boxShadow:'0 2px 8px rgba(11,29,58,.06)',border:'1px solid var(--sl2)',maxWidth:430}}>
+        {[['metrics','📊 '+t('opdMetrics')],['hw','🖥 '+t('hw')],['comp','🔒 '+t('compliance')]].map(([id,lb])=>(
+          <button key={id} type="button" onClick={()=>setTab(id)}
+            style={{flex:1,padding:'9px 5px',borderRadius:9,border:'none',cursor:'pointer',fontSize:12,fontWeight:700,
+              background:tab===id?'linear-gradient(135deg,var(--n800),var(--n700))':'transparent',color:tab===id?'#fff':'var(--t2)'}}>{lb}</button>
+        ))}
+      </div>
+      {tab==='metrics'&&(
+        <div className="fu">
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(185px,1fr))',gap:13,marginBottom:18}}>
+            {metrics.map((m,i)=>(
+              <div key={i} style={{background:'#fff',borderRadius:16,padding:18,boxShadow:'0 2px 8px rgba(11,29,58,.06)',border:'1px solid var(--sl2)',position:'relative',overflow:'hidden'}}>
+                <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:'linear-gradient(90deg,var(--n800),var(--g700))'}}/>
+                <div style={{fontSize:24,marginBottom:6}}>{m.ic}</div>
+                <div className="mbig" style={{color:'var(--n900)',fontSize:27}}>{m.v}</div>
+                <div style={{fontSize:12,color:'var(--t2)',marginTop:3,fontWeight:600}}>{m.l}</div>
+                <div style={{fontSize:10,color:'var(--t3)',marginTop:2}}>{m.s}</div>
+                <div style={{fontSize:11,fontWeight:700,marginTop:7,color:m.up?'var(--g800)':'var(--r)'}}>{m.up?'↑':'↓'} {m.c}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            <div className="card">
+              <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:13}}>📊 Hourly Patient Volume</div>
+              {['8AM','9AM','10AM','11AM','12PM','1PM','2PM'].map((h,i)=>{
+                const v=[45,128,210,187,156,98,67][i],p=Math.round(v/210*100);
+                return<div key={h} style={{display:'flex',alignItems:'center',gap:8,marginBottom:7}}>
+                  <span style={{fontSize:10,color:'var(--t3)',width:30,fontWeight:600}}>{h}</span>
+                  <div style={{flex:1,height:9,background:'var(--sl2)',borderRadius:5,overflow:'hidden'}}>
+                    <div style={{height:'100%',width:p+'%',background:'linear-gradient(90deg,var(--n700),var(--n500))',borderRadius:5,transition:'width .8s'}}/></div>
+                  <span style={{fontSize:11,fontWeight:700,width:26,textAlign:'right',color:'var(--n800)'}}>{v}</span>
+                </div>;})}
+            </div>
+            <div className="card">
+              <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:13}}>🌐 Language Distribution</div>
+              {langs.map((l,i)=>(
+                <div key={i} style={{marginBottom:10}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                    <span style={{fontSize:12,fontWeight:600}}>{l.l}</span>
+                    <span style={{fontSize:12,fontWeight:900,color:l.c}}>{l.p}%</span></div>
+                  <div className="pgb" style={{height:9}}><div style={{height:'100%',width:l.p+'%',background:l.c,borderRadius:5,transition:'width .8s'}}/></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {tab==='hw'&&(
+        <div className="fu" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          <div className="card">
+            <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:13}}>🖥 Kiosk Terminals</div>
+            {kiosks.map(k=>(
+              <div key={k.id} className="krow">
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <div className={`pdot ${k.s}`}/>
+                  <div><div style={{fontWeight:700,fontSize:12,color:'var(--n900)'}}>{k.id} — {k.loc}</div>
+                    <div style={{fontSize:10,color:'var(--t3)'}}>{k.n} sessions today</div></div>
+                </div>
+                <span style={{fontSize:10,fontWeight:800,textTransform:'uppercase',color:k.s==='on'?'var(--g800)':k.s==='warn'?'var(--amb)':'var(--r)'}}>
+                  {k.s==='on'?'Online':k.s==='warn'?'Warning':'Offline'}</span>
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:13}}>⚡ Inference Server Health</div>
+            {[{n:'GPU Load (A100)',v:67,u:'%',hi:85,c:'var(--n700)'},{n:'ASR Whisper latency',v:340,u:'ms',hi:500,c:'var(--g800)'},
+              {n:'OCR pipeline',v:4.2,u:'s',hi:8,c:'#7C3AED'},{n:'LLM summary gen',v:1.8,u:'s',hi:5,c:'var(--amb)'}].map((s,i)=>(
+              <div key={i} style={{marginBottom:12}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                  <span style={{fontSize:12,fontWeight:600}}>{s.n}</span>
+                  <span style={{fontSize:12,fontWeight:900,color:s.v>s.hi*.8?'var(--amb)':'var(--g800)'}}>{s.v}{s.u}</span></div>
+                <div className="pgb" style={{height:9}}><div style={{height:'100%',width:Math.min(s.v/s.hi*100,100)+'%',background:s.v>s.hi*.8?'var(--amb)':s.c,borderRadius:5,transition:'width .8s'}}/></div>
+              </div>
+            ))}
+            <div style={{marginTop:10,background:'linear-gradient(135deg,#F0FDF4,#ECFDF5)',borderRadius:10,padding:12,border:'1px solid rgba(21,128,61,.15)'}}>
+              <div style={{fontSize:9,fontWeight:800,color:'var(--g800)',textTransform:'uppercase',marginBottom:5}}>✓ ASR Word Error Rate</div>
+              <div style={{display:'flex',gap:14}}>
+                <div><div style={{fontSize:19,fontWeight:900,color:'var(--g800)'}}>9.8%</div><div style={{fontSize:9,color:'var(--t3)'}}>en-IN</div></div>
+                <div><div style={{fontSize:19,fontWeight:900,color:'var(--g800)'}}>11.2%</div><div style={{fontSize:9,color:'var(--t3)'}}>hi-IN</div></div>
+              </div>
+              <div style={{fontSize:9,color:'var(--t3)',marginTop:3}}>Target &lt;12% WER ✓</div>
+            </div>
+          </div>
+        </div>
+      )}
+      {tab==='comp'&&(
+        <div className="fu">
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(185px,1fr))',gap:12,marginBottom:16}}>
+            {[{ic:'📜',ti:'DPDP Act 2023',st:'Compliant'},{ic:'🔗',ti:'ABDM / FHIR R4',st:'Active'},
+              {ic:'🔒',ti:'Aadhaar Masking',st:'Enforced'},{ic:'🗑',ti:'Session Auto-Wipe',st:'30 min TTL'}].map((c,i)=>(
+              <div key={i} style={{background:'#fff',borderRadius:14,padding:16,boxShadow:'0 2px 8px rgba(11,29,58,.06)',border:'1px solid var(--sl2)',borderTop:'3px solid var(--g700)'}}>
+                <div style={{fontSize:24,marginBottom:6}}>{c.ic}</div>
+                <div style={{fontWeight:800,fontSize:12,color:'var(--n900)',marginBottom:5}}>{c.ti}</div>
+                <span className="bdg bdg-g">{c.st}</span>
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <div style={{fontWeight:800,fontSize:13,color:'var(--n900)',marginBottom:11}}>📋 Live Security Audit Log</div>
+            {logs.map((l,i)=>(
+              <div key={i} className="logr">
+                <code className="logt">{l.t}</code>
+                <span style={{fontSize:11,lineHeight:1.5,color:l.ty==='alert'?'var(--amb)':l.ty==='error'?'var(--r)':l.ty==='success'?'var(--g800)':'var(--t1)'}}>
+                  {l.ty==='alert'?'⚠ ':l.ty==='error'?'✕ ':l.ty==='success'?'✓ ':'ℹ '}{l.e}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════ CHATBOT — floating assistant (rule-based, works offline, EN + हिंदी) ══════ */
+const BOT_UI={
+  en:{title:"MediNode Assistant",sub:"Ask me how to use MediNode",fab:"Need help?",close:"Close",send:"Send",
+    ph:"Type your question…",phListen:"Listening…",mic:"Speak your question",speakIt:"Read aloud",
+    hello:"Hi! 👋 I'm the MediNode assistant.\nAsk me how to sign in, use voice, upload reports or anything else about this app — or tap a suggestion below.",
+    fallback:"I'm not sure about that one yet. I can help with:\n• Signing in, OTP & registration\n• Voice, audio & language\n• Nearby hospitals\n• Uploading reports (OCR)\n• Privacy & consent\n• How the doctor sees your summary\n\nTry one of the buttons below. For any medical question, please ask the doctor.",
+    noMic:"Voice input isn't supported in this browser — please use Google Chrome.",
+    micErr:"Couldn't hear you. Please allow the microphone permission and try again."},
+  hi:{title:"MediNode सहायक",sub:"MediNode इस्तेमाल करने में मदद पूछें",fab:"मदद चाहिए?",close:"बंद करें",send:"भेजें",
+    ph:"अपना सवाल लिखें…",phListen:"सुन रहा हूं…",mic:"बोलकर पूछें",speakIt:"सुनें",
+    hello:"नमस्ते! 👋 मैं MediNode सहायक हूं।\nलॉगिन, आवाज़ से जवाब देना, रिपोर्ट अपलोड करना या ऐप से जुड़ा कुछ भी पूछें — या नीचे दिए सुझावों पर टैप करें।",
+    fallback:"इस बारे में मुझे अभी पक्का पता नहीं है। मैं इनमें मदद कर सकता हूं:\n• लॉगिन, OTP और रजिस्ट्रेशन\n• आवाज़, ऑडियो और भाषा\n• नज़दीकी अस्पताल\n• रिपोर्ट अपलोड (OCR)\n• प्राइवेसी और सहमति\n• डॉक्टर को आपका सारांश कैसे दिखता है\n\nनीचे दिए किसी बटन पर टैप करें। किसी भी मेडिकल सवाल के लिए कृपया डॉक्टर से पूछें।",
+    noMic:"इस ब्राउज़र में वॉइस इनपुट उपलब्ध नहीं है — कृपया Google Chrome इस्तेमाल करें।",
+    micErr:"आवाज़ सुनाई नहीं दी। कृपया माइक्रोफ़ोन की अनुमति दें और फिर कोशिश करें।"}
+};
+/* Offline rule-based replies.  They intentionally live in the same locale as
+   the UI; no cloud translation or patient text is sent outside the browser. */
+const BOT_LOCALE={
+ mr:{hello:'नमस्कार! मी MediNode सहाय्यक आहे. लॉगिन, आवाज, अहवाल किंवा गोपनीयतेविषयी विचारा.',fallback:'मी MediNode वापरण्यास मदत करू शकतो: लॉगिन व OTP, आवाज आणि भाषा, जवळची रुग्णालये, अहवाल अपलोड, गोपनीयता आणि डॉक्टरांचा सारांश. वैद्यकीय सल्ल्यासाठी डॉक्टरांना विचारा.',emergency:'आपत्कालीन स्थितीत लगेच 112 किंवा 108 वर कॉल करा अथवा जवळच्या आपत्कालीन विभागात जा.'},
+ bn:{hello:'নমস্কার! আমি MediNode সহায়ক। লগইন, ভয়েস, রিপোর্ট বা গোপনীয়তা সম্পর্কে জিজ্ঞাসা করুন।',fallback:'আমি MediNode ব্যবহারে সাহায্য করতে পারি: লগইন ও OTP, ভয়েস ও ভাষা, কাছের হাসপাতাল, রিপোর্ট আপলোড, গোপনীয়তা এবং ডাক্তারের সারাংশ। চিকিৎসার পরামর্শের জন্য ডাক্তারকে জিজ্ঞাসা করুন।',emergency:'জরুরি অবস্থায় এখনই 112 বা 108 নম্বরে ফোন করুন অথবা নিকটস্থ জরুরি বিভাগে যান।'},
+ or:{hello:'ନମସ୍କାର! ମୁଁ MediNode ସହାୟକ। ଲଗଇନ, ଭଏସ, ରିପୋର୍ଟ କିମ୍ବା ଗୋପନୀୟତା ବିଷୟରେ ପଚାରନ୍ତୁ।',fallback:'ମୁଁ MediNode ବ୍ୟବହାରରେ ସାହାଯ୍ୟ କରିପାରିବି: ଲଗଇନ ଓ OTP, ଭଏସ ଓ ଭାଷା, ନିକଟ ହସ୍ପିଟାଲ, ରିପୋର୍ଟ ଅପଲୋଡ୍, ଗୋପନୀୟତା ଏବଂ ଡାକ୍ତରଙ୍କ ସାରାଂଶ। ଚିକିତ୍ସା ପରାମର୍ଶ ପାଇଁ ଡାକ୍ତରଙ୍କୁ ପଚାରନ୍ତୁ।',emergency:'ଜରୁରୀ ସ୍ଥିତିରେ ତୁରନ୍ତ 112 କିମ୍ବା 108 କୁ କଲ କରନ୍ତୁ ଅଥବା ନିକଟ ଜରୁରୀ ବିଭାଗକୁ ଯାଆନ୍ତୁ।'},
+ ta:{hello:'வணக்கம்! நான் MediNode உதவியாளர். உள்நுழைவு, குரல், அறிக்கைகள் அல்லது தனியுரிமை பற்றி கேளுங்கள்.',fallback:'MediNode பயன்படுத்த உதவுவேன்: உள்நுழைவு மற்றும் OTP, குரல் மற்றும் மொழி, அருகிலுள்ள மருத்துவமனைகள், அறிக்கை பதிவேற்றம், தனியுரிமை மற்றும் மருத்துவர் சுருக்கம். மருத்துவ ஆலோசனைக்கு மருத்துவரை அணுகுங்கள்.',emergency:'அவசரநிலையில் உடனே 112 அல்லது 108-ஐ அழைக்கவும் அல்லது அருகிலுள்ள அவசரப் பிரிவுக்குச் செல்லவும்.'},
+ kn:{hello:'ನಮಸ್ಕಾರ! ನಾನು MediNode ಸಹಾಯಕ. ಲಾಗಿನ್, ಧ್ವನಿ, ವರದಿಗಳು ಅಥವಾ ಗೌಪ್ಯತೆಯ ಬಗ್ಗೆ ಕೇಳಿ.',fallback:'MediNode ಬಳಸಲು ಸಹಾಯ ಮಾಡುತ್ತೇನೆ: ಲಾಗಿನ್ ಮತ್ತು OTP, ಧ್ವನಿ ಮತ್ತು ಭಾಷೆ, ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು, ವರದಿ ಅಪ್‌ಲೋಡ್, ಗೌಪ್ಯತೆ ಮತ್ತು ವೈದ್ಯರ ಸಾರಾಂಶ. ವೈದ್ಯಕೀಯ ಸಲಹೆಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.',emergency:'ತುರ್ತು ಪರಿಸ್ಥಿತಿಯಲ್ಲಿ ತಕ್ಷಣ 112 ಅಥವಾ 108 ಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ ಹತ್ತಿರದ ತುರ್ತು ವಿಭಾಗಕ್ಕೆ ಹೋಗಿ.'},
+ te:{hello:'నమస్కారం! నేను MediNode సహాయకుడిని. లాగిన్, వాయిస్, నివేదికలు లేదా గోప్యత గురించి అడగండి.',fallback:'MediNode ఉపయోగంలో సహాయం చేస్తాను: లాగిన్ మరియు OTP, వాయిస్ మరియు భాష, సమీప ఆసుపత్రులు, నివేదిక అప్లోడ్, గోప్యత మరియు వైద్యుని సారాంశం. వైద్య సలహా కోసం వైద్యుడిని సంప్రదించండి.',emergency:'అత్యవసర పరిస్థితిలో వెంటనే 112 లేదా 108కు కాల్ చేయండి లేదా సమీప అత్యవసర విభాగానికి వెళ్లండి.'},
+ gu:{hello:'નમસ્તે! હું MediNode સહાયક છું. લૉગિન, અવાજ, રિપોર્ટ અથવા ગોપનીયતા વિશે પૂછો.',fallback:'હું MediNode વાપરવામાં મદદ કરી શકું છું: લૉગિન અને OTP, અવાજ અને ભાષા, નજીકની હોસ્પિટલો, રિપોર્ટ અપલોડ, ગોપનીયતા અને ડૉક્ટરનો સારાંશ. તબીબી સલાહ માટે ડૉક્ટરને પૂછો.',emergency:'કટોકટીમાં તાત્કાલિક 112 અથવા 108 પર કૉલ કરો અથવા નજીકના ઇમરજન્સી વિભાગમાં જાઓ.'},
+ pa:{hello:'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ MediNode ਸਹਾਇਕ ਹਾਂ। ਲਾਗਇਨ, ਆਵਾਜ਼, ਰਿਪੋਰਟ ਜਾਂ ਨਿੱਜਤਾ ਬਾਰੇ ਪੁੱਛੋ।',fallback:'ਮੈਂ MediNode ਵਰਤਣ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ: ਲਾਗਇਨ ਅਤੇ OTP, ਆਵਾਜ਼ ਅਤੇ ਭਾਸ਼ਾ, ਨੇੜਲੇ ਹਸਪਤਾਲ, ਰਿਪੋਰਟ ਅੱਪਲੋਡ, ਨਿੱਜਤਾ ਅਤੇ ਡਾਕਟਰ ਦਾ ਸਾਰ। ਡਾਕਟਰੀ ਸਲਾਹ ਲਈ ਡਾਕਟਰ ਨੂੰ ਪੁੱਛੋ।',emergency:'ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਤੁਰੰਤ 112 ਜਾਂ 108 ਤੇ ਕਾਲ ਕਰੋ ਜਾਂ ਨੇੜਲੇ ਐਮਰਜੈਂਸੀ ਵਿਭਾਗ ਵਿੱਚ ਜਾਓ।'},
+ ml:{hello:'നമസ്കാരം! ഞാൻ MediNode സഹായിയാണ്. ലോഗിൻ, ശബ്ദം, റിപ്പോർട്ടുകൾ, സ്വകാര്യത എന്നിവയെക്കുറിച്ച് ചോദിക്കൂ.',fallback:'MediNode ഉപയോഗിക്കാൻ സഹായിക്കാം: ലോഗിൻ, OTP, ശബ്ദം, ഭാഷ, അടുത്തുള്ള ആശുപത്രികൾ, റിപ്പോർട്ട് അപ്‌ലോഡ്, സ്വകാര്യത, ഡോക്ടറുടെ സംഗ്രഹം. വൈദ്യോപദേശത്തിന് ഡോക്ടറെ സമീപിക്കുക.',emergency:'അടിയന്തര സാഹചര്യത്തിൽ ഉടൻ 112 അല്ലെങ്കിൽ 108-ൽ വിളിക്കുക അല്ലെങ്കിൽ അടുത്ത എമർജൻസി വിഭാഗത്തിൽ പോകുക.'}
+};
+
+const BOT_KB=[
+  {id:'emergency',pri:true,
+   k:["emergency","emergancy","chest pain","heart attack","cant breathe","cannot breathe","can't breathe","breathless","unconscious","bleeding","stroke","seizure","accident","poison","ambulance","सीने में दर्द","सीने","सांस","साँस","बेहोश","खून","दौरा","लकवा","इमरजेंसी","आपातकाल","एम्बुलेंस","एंबुलेंस","seene mein dard","saans","behosh","dil ka daura"],
+   en:"🚨 If this is an emergency, please don't wait — call 112 (or ambulance 108) right now or go to the nearest Emergency Department.\n\nI can't give medical advice. Inside MediNode, a severe chest-pain or stroke-like history automatically triggers the Emergency screen and alerts the nurse station.",
+   hi:"🚨 अगर यह आपातकाल है तो इंतज़ार न करें — अभी 112 (या एम्बुलेंस के लिए 108) पर कॉल करें या नज़दीकी इमरजेंसी विभाग जाएं।\n\nमैं मेडिकल सलाह नहीं दे सकता। MediNode में गंभीर सीने के दर्द या लकवे जैसे लक्षण बताने पर इमरजेंसी स्क्रीन अपने-आप खुल जाती है और नर्स स्टेशन को सूचना जाती है।"},
+  {id:'greet',k:["hi","hello","hey","hii","namaste","namaskar","good morning","good evening","नमस्ते","नमस्कार","हेलो","हैलो"],
+   en:"Hello! 👋 How can I help you with MediNode today?",
+   hi:"नमस्ते! 👋 आज मैं MediNode में आपकी क्या मदद कर सकता हूं?"},
+  {id:'thanks',k:["thanks","thank you","thankyou","thx","dhanyavad","dhanyawad","shukriya","धन्यवाद","शुक्रिया","थैंक"],
+   en:"You're welcome! 😊 Ask me anytime if you need more help.",
+   hi:"आपका स्वागत है! 😊 और मदद चाहिए तो कभी भी पूछें।"},
+  {id:'about',k:["what is medinode","about medinode","medinode","what is this","what does this app","purpose","मेडीनोड","ये ऐप क्या","यह ऐप क्या"],
+   en:"MediNode is an AI clinical intake system. Patients answer questions by voice or touch, can scan reports with OCR, and a ready summary goes straight to the doctor's queue — reducing OPD waiting time.",
+   hi:"MediNode एक AI क्लिनिकल इनटेक सिस्टम है। मरीज़ आवाज़ या टच से सवालों के जवाब देते हैं, रिपोर्ट OCR से स्कैन कर सकते हैं, और तैयार सारांश सीधे डॉक्टर की कतार में पहुंच जाता है — इससे OPD में इंतज़ार कम होता है।"},
+  {id:'login',k:["login","log in","sign in","signin","existing patient","abha","aadhaar","aadhar","health id","लॉगिन","साइन इन","आभा","आधार","खाता"],
+   en:"To sign in:\n• Open the 'Existing Patient' tab\n• Choose ABHA ID or Aadhaar\n• Enter your ID (ABHA: 14 digits or username@abdm · Aadhaar: 12 digits starting with 2–9)\n• Tap Send OTP, enter the 6-digit code and tap Verify & Continue\n\nIn this demo, the OTP is 123456.",
+   hi:"साइन इन करने के लिए:\n• 'Existing Patient' टैब खोलें\n• ABHA ID या Aadhaar चुनें\n• अपनी ID डालें (ABHA: 14 अंक या username@abdm · Aadhaar: 2–9 से शुरू होने वाले 12 अंक)\n• Send OTP दबाएं, 6 अंकों का कोड डालें और Verify & Continue दबाएं\n\nइस डेमो में OTP 123456 है।"},
+  {id:'otp',k:["otp","one time password","verification code","not received","didn't get","ओटीपी","कोड नहीं"],
+   en:"The OTP is a 6-digit code sent to your registered mobile number. Type it in the OTP box and tap Verify & Continue. In this demo version, use 123456.",
+   hi:"OTP आपके रजिस्टर्ड मोबाइल नंबर पर आने वाला 6 अंकों का कोड है। इसे OTP बॉक्स में डालकर Verify & Continue दबाएं। इस डेमो वर्ज़न में 123456 इस्तेमाल करें।"},
+  {id:'register',k:["register","registration","new patient","sign up","signup","create abha","naya","नया मरीज़","नया मरीज","रजिस्टर","पंजीकरण","रजिस्ट्रेशन"],
+   en:"New here? Open the 'New Registration' tab and fill in your name, date of birth, gender, mobile number and address (you can speak into any field with 🎤). Then tap Register & Continue to get your ABHA ID.",
+   hi:"नए हैं? 'New Registration' टैब खोलें और अपना नाम, जन्मतिथि, लिंग, मोबाइल नंबर और पता भरें (किसी भी फ़ील्ड में 🎤 से बोलकर भी भर सकते हैं)। फिर Register & Continue दबाकर अपनी ABHA ID पाएं।"},
+  {id:'voice',k:["mic","microphone","voice","speak","speech","talk","bol","bolna","bolkar","बोल","बोलकर","माइक","माइक्रोफ़ोन","आवाज़","वॉइस"],
+   en:"Every field and question has a 🎤 button. Tap it, speak, and your words are typed for you (you'll see 'Heard: …' to confirm). For multiple-choice questions, say the option's letter, number or text.\n\nIf the mic doesn't respond: use Google Chrome and allow the microphone permission in the address bar.",
+   hi:"हर फ़ील्ड और सवाल में 🎤 बटन है। उसे दबाकर बोलें, आपके शब्द अपने-आप लिख जाएंगे (पुष्टि के लिए 'सुना: …' दिखेगा)। विकल्प वाले सवालों में विकल्प का अक्षर, नंबर या नाम बोलें।\n\nअगर माइक काम न करे: Google Chrome इस्तेमाल करें और एड्रेस बार में माइक्रोफ़ोन की अनुमति दें।"},
+  {id:'audio',k:["audio","sound","speaker","read aloud","read out","listen","mute","volume","suna","sunao","सुन","सुनाओ","आवाज़ बंद","ऑडियो","स्पीकर"],
+   en:"Use the 🔊 Audio button in the top bar to turn voice guidance ON or OFF. When it's ON, questions and options are read aloud. You can also tap 🔊 next to any field or option to hear just that one.",
+   hi:"ऊपर की बार में 🔊 Audio बटन से आवाज़ वाली मदद चालू या बंद करें। चालू होने पर सवाल और विकल्प बोलकर सुनाए जाते हैं। किसी भी फ़ील्ड या विकल्प के पास 🔊 दबाकर सिर्फ़ वही सुन भी सकते हैं।"},
+  {id:'language',k:["language","hindi","english","bhasha","translate","भाषा","हिंदी","हिन्दी","अंग्रेज़ी","अंग्रेजी","इंग्लिश"],
+   en:"Use the language menu at the top right (EN / हिं) to switch the app between English and Hindi — screen text, spoken prompts and voice recognition all change together.",
+   hi:"ऊपर दाईं तरफ़ भाषा मेनू (EN / हिं) से ऐप को अंग्रेज़ी या हिंदी में बदलें — स्क्रीन का टेक्स्ट, बोलकर सुनाए जाने वाले सवाल और वॉइस पहचान, सब एक साथ बदल जाते हैं।"},
+  {id:'hospitals',k:["hospital","hospitals","location","nearby","gps","near me","nearest","distance","अस्पताल","हॉस्पिटल","लोकेशन","नज़दीक","नजदीक","पास के"],
+   en:"Tap 📍 Detect My Location on the sign-in card. MediNode uses your device's GPS to re-sort the nearby ABHA hospitals by real distance. If you deny the permission, it shows demo hospitals instead.",
+   hi:"साइन-इन कार्ड पर 📍 Detect My Location दबाएं। MediNode आपके डिवाइस के GPS से नज़दीकी ABHA अस्पतालों को असली दूरी के हिसाब से क्रम में लगाता है। अनुमति न देने पर डेमो अस्पताल दिखते हैं।"},
+  {id:'ocr',k:["ocr","report","reports","upload","scan","lab","labs","prescription","document","documents","photo","रिपोर्ट","स्कैन","दस्तावेज़","पर्ची","पर्चा","अपलोड","फोटो"],
+   en:"After the questions, the Documents step lets you upload or click a photo of a prescription or lab report. MediNode reads it with OCR and picks out medicines, lab values and possible drug interactions for the doctor. You can also skip this step.",
+   hi:"सवालों के बाद Documents स्टेप में आप पर्ची या लैब रिपोर्ट की फोटो अपलोड या क्लिक कर सकते हैं। MediNode उसे OCR से पढ़कर दवाइयां, लैब वैल्यू और संभावित दवा-इंटरैक्शन डॉक्टर के लिए निकाल देता है। यह स्टेप छोड़ भी सकते हैं।"},
+  {id:'modes',k:["allopathy","ayush","ayurveda","ayurvedic","consultation","socrates","dashavidha","which mode","एलोपैथी","आयुष","आयुर्वेद","परामर्श"],
+   en:"After consent, you choose a consultation type:\n• Allopathy OPD — a SOCRATES-style history of your pain or symptoms\n• AYUSH / Ayurveda — an assessment covering prakriti, agni, koshtha and more\n\nPick whichever matches the care you want.",
+   hi:"सहमति के बाद आप परामर्श का प्रकार चुनते हैं:\n• Allopathy OPD — दर्द या लक्षणों का SOCRATES-शैली में इतिहास\n• AYUSH / आयुर्वेद — प्रकृति, अग्नि, कोष्ठ आदि का आकलन\n\nजिस तरह का इलाज चाहिए वही चुनें।"},
+  {id:'privacy',k:["privacy","private","dpdp","consent","safe","secure","security","confidential","गोपनीयता","प्राइवेसी","सहमति","सुरक्षित","कंसेंट"],
+   en:"MediNode asks for your consent under the DPDP Act 2023 before going ahead. The consent checkboxes appear right after sign-in, and you need to accept them to continue.",
+   hi:"आगे बढ़ने से पहले MediNode DPDP अधिनियम 2023 के तहत आपकी सहमति मांगता है। सहमति वाले चेकबॉक्स साइन-इन के तुरंत बाद दिखते हैं और आगे जाने के लिए उन्हें स्वीकार करना ज़रूरी है।"},
+  {id:'flow',k:["steps","process","journey","how it works","how does it work","procedure","start","शुरू","प्रक्रिया","कैसे काम","स्टेप"],
+   en:"The patient journey has 4 steps:\n1. Consent\n2. Choose Allopathy or AYUSH\n3. Answer the history questions by voice or touch\n4. Upload documents (optional)\n\nThen you get a summary and a token — tap Submit to Doctor and you're in the queue.",
+   hi:"मरीज़ की प्रक्रिया में 4 स्टेप होते हैं:\n1. सहमति\n2. Allopathy या AYUSH चुनना\n3. आवाज़ या टच से इतिहास के सवालों के जवाब देना\n4. दस्तावेज़ अपलोड करना (वैकल्पिक)\n\nफिर आपको सारांश और टोकन मिलता है — Submit to Doctor दबाते ही आप कतार में आ जाते हैं।"},
+  {id:'token',k:["token","triage","submit","queue","priority","colour","color","टोकन","कतार","प्राथमिकता","ट्राइएज"],
+   en:"After the summary you get a token and a triage colour, based mainly on the severity you report: 🔴 emergency, 🟡 priority or 🟢 routine. Tap Submit to Doctor and your record appears at the top of the doctor's queue.",
+   hi:"सारांश के बाद आपको एक टोकन और ट्राइएज रंग मिलता है, जो मुख्य रूप से आपके बताए दर्द/तकलीफ़ की गंभीरता पर निर्भर है: 🔴 आपातकाल, 🟡 प्राथमिकता या 🟢 सामान्य। Submit to Doctor दबाते ही आपका रिकॉर्ड डॉक्टर की कतार में सबसे ऊपर दिखता है।"},
+  {id:'doctor',k:["doctor","physician","ai summary","fhir","डॉक्टर","चिकित्सक"],
+   en:"Doctor mode shows the live patient queue. For each patient there are tabs for AI Summary (editable), Full History, Documents, Prescription and FHIR R4. New submissions appear at the top with a green NEW badge.",
+   hi:"Doctor मोड में मरीज़ों की लाइव कतार दिखती है। हर मरीज़ के लिए AI Summary (बदला जा सकता है), Full History, Documents, Prescription और FHIR R4 टैब होते हैं। नई एंट्री सबसे ऊपर हरे NEW बैज के साथ दिखती है।"},
+  {id:'admin',k:["admin","dashboard","analytics","metrics","statistics","एडमिन","डैशबोर्ड","एनालिटिक्स"],
+   en:"Admin mode is the hospital dashboard: OPD metrics such as average intake time, daily patients and voice usage, plus language distribution, hardware status and compliance.",
+   hi:"Admin मोड अस्पताल का डैशबोर्ड है: औसत इनटेक समय, रोज़ाना मरीज़ और वॉइस इस्तेमाल जैसे OPD मेट्रिक्स, साथ में भाषा वितरण, हार्डवेयर स्थिति और अनुपालन।"},
+  {id:'time',k:["how long","kitna time","kitna samay","duration","waiting","wait time","minutes","इंतज़ार","इंतजार","कितना समय","कितनी देर"],
+   en:"Intake typically takes under 3 minutes. The nearby-hospital cards also show an estimated waiting time for each hospital.",
+   hi:"इनटेक में आम तौर पर 3 मिनट से कम लगते हैं। नज़दीकी अस्पतालों के कार्ड में हर अस्पताल का अनुमानित इंतज़ार समय भी दिखता है।"},
+  {id:'medical',k:["medicine","medicines","dose","dosage","diagnose","diagnosis","treatment","cure","symptom","symptoms","दवा","दवाई","इलाज","बीमारी","लक्षण","निदान"],
+   en:"I can't give medical advice or a diagnosis. Please describe your symptoms in the intake so the doctor can review them, and follow the doctor's guidance. If it feels urgent, call 112 or go to the nearest Emergency Department.",
+   hi:"मैं मेडिकल सलाह या निदान नहीं दे सकता। कृपया इनटेक में अपने लक्षण बताएं ताकि डॉक्टर उन्हें देख सकें, और डॉक्टर की सलाह मानें। अगर मामला गंभीर लगे तो 112 पर कॉल करें या नज़दीकी इमरजेंसी विभाग जाएं।"}
+];
+
+const BOT_CHIPS={
+  patient:[{id:'login',en:"How do I sign in?",hi:"साइन इन कैसे करें?"},{id:'voice',en:"Use voice",hi:"आवाज़ से जवाब दें"},{id:'ocr',en:"Upload reports",hi:"रिपोर्ट अपलोड"},{id:'privacy',en:"Is my data safe?",hi:"क्या डेटा सुरक्षित है?"},{id:'hospitals',en:"Nearby hospitals",hi:"नज़दीकी अस्पताल"}],
+  doctor:[{id:'doctor',en:"Doctor view",hi:"डॉक्टर व्यू"},{id:'token',en:"Triage & token",hi:"ट्राइएज और टोकन"},{id:'language',en:"Change language",hi:"भाषा बदलें"},{id:'voice',en:"Use voice",hi:"आवाज़ से जवाब दें"}],
+  admin:[{id:'admin',en:"Admin dashboard",hi:"एडमिन डैशबोर्ड"},{id:'doctor',en:"Doctor view",hi:"डॉक्टर व्यू"},{id:'language',en:"Change language",hi:"भाषा बदलें"},{id:'privacy',en:"Privacy & consent",hi:"प्राइवेसी और सहमति"}]
+};
+
+const botNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/\u093c/g,'');
+const BOT_SPLIT=new RegExp('[^\\p{L}\\p{M}\\p{N}]+','u');
+const BOT_STRIP=new RegExp('[•\\u{1F300}-\\u{1FAFF}\\u2600-\\u27BF]','gu');
+function botMatch(q){
+  const text=botNorm(q),toks=new Set(text.split(BOT_SPLIT).filter(Boolean));
+  let best=null,bestScore=0;
+  for(const e of BOT_KB){
+    let sc=0;
+    for(const k of e.k){
+      const kk=botNorm(k);
+      if(kk.length<=3?toks.has(kk):text.includes(kk))sc+=Math.max(kk.length,5);
+    }
+    if(e.pri)sc*=3;
+    if(sc>bestScore){best=e;bestScore=sc;}
+  }
+  return best?best.id:null;
+}
+function botText(ref,lang){
+  const ui=BOT_UI[lang]||BOT_UI.en;
+  const local=BOT_LOCALE[lang];
+  if(local){
+    if(ref==='hello'||ref==='greet')return local.hello;
+    if(ref==='emergency')return local.emergency;
+    /* Each offline rule returns a safe, in-language answer instead of falling
+       through to English while a user is speaking their selected language. */
+    return local.fallback;
+  }
+  if(ref==='hello')return ui.hello;
+  if(ref==='fallback')return ui.fallback;
+  const e=BOT_KB.find(x=>x.id===ref);
+  return e?(e[lang]||e.en):ui.fallback;
+}
+
+function ChatBot({lang,audioOn,role}){
+  const ui=BOT_UI[lang]||BOT_UI.en;
+  const [open,setOpen]=useState(false);
+  const [msgs,setMsgs]=useState([{id:0,from:'bot',ref:'hello'}]);
+  const [inp,setInp]=useState('');
+  const [typing,setTyping]=useState(false);
+  const [rec,setRec]=useState(false);
+  const [hint,setHint]=useState('');
+  const bodyRef=useRef(null),inRef=useRef(null),timer=useRef(null),seq=useRef(1);
+  const {supported,start,stop}=useMic(lang);
+  const speak=useSpeak(lang,audioOn);
+
+  useEffect(()=>{
+    if(open&&bodyRef.current)bodyRef.current.scrollTop=bodyRef.current.scrollHeight;
+  },[msgs,typing,open]);
+  useEffect(()=>{if(open)setTimeout(()=>inRef.current?.focus(),60);},[open]);
+  useEffect(()=>()=>clearTimeout(timer.current),[]);
+  useEffect(()=>{setHint('');},[lang]);
+
+  function push(m){setMsgs(p=>[...p,{id:seq.current++,...m}]);}
+  function send(text,forcedId){
+    const q=(text||'').trim();
+    if(!q||typing)return;
+    push({from:'me',text:q});
+    setInp('');setHint('');setTyping(true);
+    timer.current=setTimeout(()=>{
+      const id=forcedId||botMatch(q)||'fallback';
+      push({from:'bot',ref:id});
+      setTyping(false);
+      if(id==='emergency'&&audioOn)Speech.speak(botText(id,lang).replace(BOT_STRIP,''),lang);
+    },550);
+  }
+  function toggleMic(){
+    if(rec){stop();setRec(false);return;}
+    if(!supported){setHint(ui.noMic);return;}
+    setHint('');Speech.stop();
+    const ok=start(txt=>{if(txt)send(txt);},err=>{
+      setRec(false);
+      if(err&&err!=='no-speech'&&err!=='aborted')setHint(ui.micErr);
+    });
+    if(ok)setRec(true);
+  }
+  function closeChat(){stop();setRec(false);Speech.stop();setOpen(false);}
+
+  return(
+    <>
+      {open&&(
+        <div className="cb-panel" role="dialog" aria-label={ui.title}
+             onKeyDown={e=>{if(e.key==='Escape')closeChat();}}>
+          <div className="cb-hdr">
+            <div className="logo-ic">💬</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="cb-t">{ui.title}</div>
+              <div className="cb-s"><span className="cb-on"/>{ui.sub}</div>
+            </div>
+            <button type="button" className="cb-x" onClick={closeChat} aria-label={ui.close}>✕</button>
+          </div>
+
+          <div className="cb-body" ref={bodyRef}>
+            {msgs.map(m=>{
+              const txt=m.from==='me'?m.text:botText(m.ref,lang);
+              return(
+                <div key={m.id} className={`cb-msg ${m.from}`}>
+                  <div className={`cb-b ${m.from}`}>{txt}</div>
+                  {m.from==='bot'&&(
+                    <button type="button" className="icon-btn cb-act" title={ui.speakIt} aria-label={ui.speakIt}
+                            onClick={()=>speak(txt.replace(BOT_STRIP,''),true)}>🔊</button>
+                  )}
+                </div>
+              );
+            })}
+            {typing&&<div className="cb-msg bot"><div className="cb-b bot cb-typing"><i/><i/><i/></div></div>}
+          </div>
+
+          <div className="cb-chips">
+            {(BOT_CHIPS[role]||BOT_CHIPS.patient).map(c=>(
+              <button key={c.id} type="button" className="cb-chip" onClick={()=>send(c[lang]||c.en,c.id)}>{c[lang]||c.en}</button>
+            ))}
+          </div>
+          {hint&&<div className="cb-hint">{hint}</div>}
+
+          <div className="cb-in">
+            <div className="vf-wrap" style={{flex:1}}>
+              <input ref={inRef} className={`vf-in ${rec?'rec':''}`} value={inp} maxLength={300}
+                     placeholder={rec?ui.phListen:ui.ph} aria-label={ui.ph}
+                     onChange={e=>setInp(e.target.value)}
+                     onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();send(inp);}}}/>
+              <button type="button" className={`vf-mic vf-mic-mid ${rec?'rec':''}`} title={ui.mic} aria-label={ui.mic}
+                      onClick={e=>{e.stopPropagation();toggleMic();}}>🎤</button>
+            </div>
+            <button type="button" className="btn btn-p btn-sm" disabled={!inp.trim()||typing} onClick={()=>send(inp)}>{ui.send}</button>
+          </div>
+        </div>
+      )}
+      <button type="button" className="cb-fab" onClick={()=>open?closeChat():setOpen(true)} aria-expanded={open}>
+        <span>{open?'✕':'💬'}</span><span>{open?ui.close:ui.fab}</span>
+      </button>
+    </>
+  );
+}
+
+/* ══════ ROOT ══════ */
+function App(){
+  const [role,setRole]=useState('patient');
+  const [lang,setLang]=useState('en');
+  const [easy,setEasy]=useState(false);
+  const appRef=useRef(null);
+  const [audioOn,setAudioOn]=useState(true);
+  const [toast,setToast]=useState(null);
+  const [queue,setQueue]=useState(SEED_PATIENTS);
+  const t=useT(lang);
+  usePageLanguage(lang,appRef);
+
+  // Unlock speech synthesis on first user gesture (required by Chrome/Safari)
+  useEffect(()=>{
+    const unlock=()=>{
+      try{
+        const u=new SpeechSynthesisUtterance('');u.volume=0;
+        window.speechSynthesis?.speak(u);
+      }catch(e){}
+      Speech.init();
+      window.removeEventListener('pointerdown',unlock);
+      window.removeEventListener('keydown',unlock);
+    };
+    window.addEventListener('pointerdown',unlock,{once:true});
+    window.addEventListener('keydown',unlock,{once:true});
+    return()=>{window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);};
+  },[]);
+
+  const showToast=useCallback((msg,type='info')=>setToast({msg,type,id:Date.now()}),[]);
+  const addToQueue=useCallback(p=>{
+    setQueue(q=>[{...p,fresh:true},...q]);
+  },[]);
+  const markSeen=useCallback(id=>{
+    setQueue(q=>q.map(p=>p.id===id?{...p,fresh:false}:p));
+  },[]);
+
+  function changeLang(l){
+    setLang(l);
+    Speech.stop();
+    if(audioOn)setTimeout(()=>Speech.speak(`${languageMeta(l).label} language selected`,l),120);
+  }
+  function toggleAudio(){
+    const n=!audioOn;setAudioOn(n);
+    if(!n)Speech.stop();
+    else Speech.speak(t('audioOn'),lang);
+  }
+  const freshCount=queue.filter(p=>p.fresh).length;
+
+  return(
+    <div ref={appRef} className={role==='patient'&&easy?'senior-ui':''}>
+      <header className="hdr">
+        <div className="logo">
+          <div className="logo-ic">⚕</div>
+          <div>
+            <div className="logo-tx">Medi<em>Node</em><span style={{fontSize:10,fontWeight:500,color:'rgba(255,255,255,.4)',marginLeft:5}}>v4</span></div>
+            <div className="logo-sb">{t('sub')}</div>
+          </div>
+        </div>
+        <div className="rsw">
+          {[['patient',t('pt'),'🧑'],['doctor',t('doc'),'👨‍⚕️'],['admin',t('adm'),'📊']].map(([r,lb,ic])=>(
+            <button key={r} type="button" className={`rbtn ${role===r?'on':''}`} onClick={()=>{setRole(r);Speech.stop();}}>
+              {ic} {lb}
+              {r==='doctor'&&freshCount>0&&role!=='doctor'&&<span className="qdot">{freshCount}</span>}
+            </button>
+          ))}
+        </div>
+        <div className="hdr-r">
+          <select className="lpill" value={lang} onChange={e=>changeLang(e.target.value)} aria-label="Select language">
+            {LANGUAGES.map(({id,short,label})=><option key={id} value={id}>{short} · {label}</option>)}
+          </select>
+          <button type="button" className={`apill ${!audioOn?'muted':''}`} onClick={toggleAudio}>
+            {audioOn?'🔊':'🔇'} {audioOn?t('audioOn'):t('audioOff')}
+          </button>
+          {role==='patient'&&<button type="button" className={`apill ${easy?'':'muted'}`} onClick={()=>setEasy(v=>!v)} title="Easy mode for elderly users">
+            🧓 {easy?'Easy':'Easy mode'}
+          </button>}
+          <span className="abha-chip">ABDM ✓</span>
+        </div>
+      </header>
+      <main className="main">
+        {role==='patient'&&<PatientMode lang={lang} audioOn={audioOn} showToast={showToast} addToQueue={addToQueue} easy={easy} onEasyChange={setEasy} onToggleAudio={toggleAudio}/>}
+        {role==='doctor'&&<DoctorMode lang={lang} audioOn={audioOn} showToast={showToast} queue={queue} markSeen={markSeen}/>}
+        {role==='admin'&&<AdminMode lang={lang} queue={queue}/>}
+      </main>
+      {toast&&<Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+      <ChatBot lang={lang} audioOn={audioOn} role={role}/>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
